@@ -63,6 +63,7 @@
   nav.tabs{
     display:flex;
     gap:6px;
+    flex-wrap:wrap;
   }
   nav.tabs button{
     background:transparent;
@@ -77,6 +78,31 @@
   nav.tabs button.active{
     background:var(--med-green);
     border-color:var(--med-green);
+  }
+  .user-bar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:12.5px;
+    color:var(--pale-green);
+  }
+  .user-bar .role-badge{
+    background:var(--light-green);
+    color:var(--dark-green);
+    padding:2px 8px;
+    border-radius:10px;
+    font-size:11px;
+    font-weight:bold;
+  }
+  .user-bar button{
+    background:transparent;
+    border:1px solid var(--light-green);
+    color:var(--white);
+    padding:5px 10px;
+    font-size:12px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:inherit;
   }
   main{
     max-width:960px;
@@ -117,7 +143,7 @@
     display:block;
     margin-bottom:4px;
   }
-  input[type=text], input[type=number], input[type=date], select, textarea{
+  input[type=text], input[type=number], input[type=date], input[type=password], select, textarea{
     width:100%;
     padding:8px 9px;
     border:1px solid #B8C4BE;
@@ -245,6 +271,17 @@
     font-family:inherit;
     padding:6px;
   }
+  button.danger{
+    background:var(--fail-red);
+    color:var(--white);
+    border:none;
+    padding:7px 12px;
+    font-size:12px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  button:disabled{opacity:0.55;cursor:not-allowed;}
   .banner{
     padding:10px 14px;
     border-radius:5px;
@@ -280,7 +317,7 @@
   }
   .tag.fail{background:var(--fail-red);}
   .tag.ok{background:var(--med-green);}
-  .hist-btns{display:flex;gap:8px;}
+  .hist-btns{display:flex;gap:8px;flex-wrap:wrap;}
   .hist-btns button{
     font-size:12px;
     padding:7px 12px;
@@ -324,6 +361,32 @@
     color:#6C7A75;
     padding:20px;
   }
+  /* auth screen */
+  #authScreen{
+    max-width:380px;
+    margin:60px auto;
+    padding:0 16px;
+  }
+  #authScreen .card{padding:24px;}
+  #authScreen h2{margin-top:0;}
+  #authScreen .field{margin-bottom:14px;}
+  /* users / config admin */
+  .user-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid var(--pale-green);
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .user-row:last-child{border-bottom:none;}
+  #configEditor{
+    width:100%;
+    min-height:360px;
+    font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:12.5px;
+  }
 
   @media print{
     body *{visibility:hidden;}
@@ -335,6 +398,45 @@
 </head>
 <body>
 
+<!-- ============ AUTH SCREEN ============ -->
+<div id="authScreen" class="no-print">
+  <div class="card" id="setupCard">
+    <h2>Create the first admin account</h2>
+    <p class="section-note">No accounts exist yet. Create the first one — it will be an admin account that can manage everything, including adding more users.</p>
+    <div id="setupBanner"></div>
+    <div class="field">
+      <label for="setupUsername">Username</label>
+      <input type="text" id="setupUsername" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="setupPassword">Password (8+ characters)</label>
+      <input type="password" id="setupPassword" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label for="setupPassword2">Confirm password</label>
+      <input type="password" id="setupPassword2" autocomplete="new-password">
+    </div>
+    <button class="primary" id="setupBtn" style="width:100%;">Create admin account</button>
+  </div>
+
+  <div class="card hidden" id="loginCard">
+    <h2>Sign in</h2>
+    <div id="loginBanner"></div>
+    <div class="field">
+      <label for="loginUsername">Username</label>
+      <input type="text" id="loginUsername" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" autocomplete="current-password">
+    </div>
+    <button class="primary" id="loginBtn" style="width:100%;">Sign in</button>
+  </div>
+</div>
+
+<!-- ============ APP (hidden until signed in) ============ -->
+<div id="appRoot" class="hidden">
+
 <header class="appbar no-print">
   <div class="brand">
     <span class="mark">INSPECT</span>
@@ -343,7 +445,13 @@
   <nav class="tabs">
     <button id="tabNewBtn" class="active">New Inspection</button>
     <button id="tabHistBtn">Inspection History</button>
+    <button id="tabUsersBtn" class="hidden">Users</button>
+    <button id="tabConfigBtn" class="hidden">Checklist Setup</button>
   </nav>
+  <div class="user-bar">
+    <span id="userLabel"></span>
+    <button id="logoutBtn">Sign out</button>
+  </div>
 </header>
 
 <main>
@@ -352,6 +460,10 @@
 
   <!-- ============ NEW INSPECTION VIEW ============ -->
   <section id="viewNew">
+
+    <div class="card hidden" id="editNotice">
+      <p class="section-note" style="margin:0;">Editing an existing inspection (<strong id="editNoticeId"></strong>). Saving will overwrite it. <button type="button" class="ghost" id="cancelEditBtn" style="padding:0;">Cancel edit</button></p>
+    </div>
 
     <div class="card">
       <h2>Equipment &amp; Operator Information</h2>
@@ -391,8 +503,6 @@
         <label for="fAttachment">Attachment in Use</label>
         <select id="fAttachment">
           <option value="none">None</option>
-          <option value="grapple">Grapple</option>
-          <option value="magnet">Magnet</option>
         </select>
       </div>
     </div>
@@ -462,6 +572,52 @@
     <div id="histList"></div>
   </section>
 
+  <!-- ============ USERS VIEW (admin only) ============ -->
+  <section id="viewUsers" class="hidden">
+    <div class="card">
+      <h2>Add a user</h2>
+      <div id="userBanner"></div>
+      <div class="grid3">
+        <div class="field">
+          <label for="newUserName">Username</label>
+          <input type="text" id="newUserName" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="newUserPassword">Password (8+ characters)</label>
+          <input type="password" id="newUserPassword" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label for="newUserRole">Role</label>
+          <select id="newUserRole">
+            <option value="general">General user</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions-bar">
+        <button class="primary" id="addUserBtn" type="button">Add user</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Existing users</h2>
+      <div id="usersList"></div>
+    </div>
+  </section>
+
+  <!-- ============ CHECKLIST CONFIG VIEW (admin only) ============ -->
+  <section id="viewConfig" class="hidden">
+    <div class="card">
+      <h2>Checklist configuration</h2>
+      <p class="section-note">This controls every equipment type, checklist item, fluid check, and attachment checklist in the app. Edit as JSON, then save. Everyone sees the updated checklist immediately.</p>
+      <div id="configBanner"></div>
+      <textarea id="configEditor" spellcheck="false"></textarea>
+      <div class="actions-bar" style="margin-top:12px;">
+        <button class="ghost" id="resetConfigBtn" type="button">Reset to defaults</button>
+        <button class="primary" id="saveConfigBtn" type="button">Save configuration</button>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <footer class="app-footer no-print">
@@ -479,130 +635,153 @@
 <!-- Printable area (populated dynamically) -->
 <div id="printArea"></div>
 
+</div><!-- /#appRoot -->
+
 <script>
 (function(){
 
   /* ---------------------------------------------------------
-     CONFIG: equipment types, checklist items, fluids, attachments
+     Small fetch helper
   --------------------------------------------------------- */
+  function api(url, options){
+    options = options || {};
+    options.headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+    return fetch(url, options).then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(body){
+        if(!res.ok){
+          var err = new Error(body.error || 'Request failed');
+          err.status = res.status;
+          err.body = body;
+          throw err;
+        }
+        return body;
+      });
+    });
+  }
 
-  var COMMON_ITEMS = [
-    "Walk-around visual inspection for new damage",
-    "Tires / tracks condition and pressure",
-    "Lights, signals and beacon",
-    "Horn and backup alarm",
-    "Mirrors and camera visibility",
-    "Seatbelt and operator restraint",
-    "Fire extinguisher present and charged",
-    "Visible fluid, oil or coolant leaks",
-    "Frame and structure condition",
-    "Gauges and warning lights at start-up"
-  ];
+  /* ---------------------------------------------------------
+     AUTH STATE + BOOTSTRAP
+  --------------------------------------------------------- */
+  var CURRENT_USER = null;
+  var APP_CONFIG = null;
 
-  var EQUIPMENT_TYPES = {
-    materialHandler: {
-      label: "Material Handler",
-      items: [
-        "Boom and stick condition",
-        "Cab riser / elevation function",
-        "Counterweight and undercarriage",
-        "Hydraulic hoses and cylinders",
-        "Slew ring / rotation bearing"
-      ]
-    },
-    loader: {
-      label: "Loader",
-      items: [
-        "Bucket / attachment linkage",
-        "Articulation joint",
-        "Bucket cutting edge and teeth",
-        "Hydraulic cylinders"
-      ]
-    },
-    skidSteer: {
-      label: "Skid Steer",
-      items: [
-        "Attachment locking mechanism / quick coupler",
-        "Lift arms and cylinders",
-        "Cab door and restraint bar",
-        "Undercarriage, tires or tracks"
-      ]
-    },
-    forklift: {
-      label: "Forklift",
-      items: [
-        "Forks and carriage condition",
-        "Mast and lift chains",
-        "Load backrest extension",
-        "Overhead guard",
-        "Capacity data plate legible"
-      ]
-    },
-    haulTruck: {
-      label: "Haul Truck",
-      items: [
-        "Braking system (service and parking)",
-        "Dump body and hoist cylinder",
-        "Articulation joint",
-        "Backup camera and alarm system",
-        "Tarp system (if equipped)"
-      ]
+  function showBannerIn(elId, msg, type){
+    var b = document.getElementById(elId);
+    b.className = 'banner ' + (type || 'ok');
+    b.textContent = msg;
+    b.classList.remove('hidden');
+  }
+  function clearBannerIn(elId){
+    var b = document.getElementById(elId);
+    b.className = 'banner hidden';
+    b.textContent = '';
+  }
+
+  function boot(){
+    api('/api/auth').then(function(status){
+      if(status.needsSetup){
+        document.getElementById('setupCard').classList.remove('hidden');
+        document.getElementById('loginCard').classList.add('hidden');
+        document.getElementById('authScreen').classList.remove('hidden');
+        document.getElementById('appRoot').classList.add('hidden');
+      } else if(!status.user){
+        document.getElementById('setupCard').classList.add('hidden');
+        document.getElementById('loginCard').classList.remove('hidden');
+        document.getElementById('authScreen').classList.remove('hidden');
+        document.getElementById('appRoot').classList.add('hidden');
+      } else {
+        document.getElementById('authScreen').classList.add('hidden');
+        startApp(status.user);
+      }
+    }).catch(function(e){
+      console.error('Auth status error', e);
+      document.getElementById('loginCard').classList.remove('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+      showBannerIn('loginBanner', 'Could not reach the server. Please refresh and try again.', 'err');
+    });
+  }
+
+  document.getElementById('setupBtn').addEventListener('click', function(){
+    clearBannerIn('setupBanner');
+    var username = document.getElementById('setupUsername').value.trim();
+    var pw1 = document.getElementById('setupPassword').value;
+    var pw2 = document.getElementById('setupPassword2').value;
+    if(!username || !pw1){ showBannerIn('setupBanner', 'Username and password are required.', 'err'); return; }
+    if(pw1.length < 8){ showBannerIn('setupBanner', 'Password must be at least 8 characters.', 'err'); return; }
+    if(pw1 !== pw2){ showBannerIn('setupBanner', 'Passwords do not match.', 'err'); return; }
+    api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'setup', username: username, password: pw1 }) })
+      .then(function(res){
+        document.getElementById('authScreen').classList.add('hidden');
+        startApp(res.user);
+      })
+      .catch(function(e){ showBannerIn('setupBanner', e.message, 'err'); });
+  });
+
+  document.getElementById('loginBtn').addEventListener('click', function(){
+    clearBannerIn('loginBanner');
+    var username = document.getElementById('loginUsername').value.trim();
+    var password = document.getElementById('loginPassword').value;
+    if(!username || !password){ showBannerIn('loginBanner', 'Username and password are required.', 'err'); return; }
+    api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'login', username: username, password: password }) })
+      .then(function(res){
+        document.getElementById('authScreen').classList.add('hidden');
+        startApp(res.user);
+      })
+      .catch(function(e){ showBannerIn('loginBanner', e.message, 'err'); });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    api('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'logout' }) })
+      .then(function(){ window.location.reload(); })
+      .catch(function(){ window.location.reload(); });
+  });
+
+  function handleAuthLoss(err){
+    if(err && err.status === 401){
+      document.getElementById('appRoot').classList.add('hidden');
+      document.getElementById('loginCard').classList.remove('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+      showBannerIn('loginBanner', 'Your session expired. Please sign in again.', 'err');
+      return true;
     }
-  };
+    return false;
+  }
 
-  var FLUID_ITEMS = [
-    "Engine oil level",
-    "Hydraulic fluid level",
-    "Coolant level",
-    "Fuel level",
-    "DEF level",
-    "Grease / lubrication points"
-  ];
+  /* ---------------------------------------------------------
+     APP START (after auth confirmed)
+  --------------------------------------------------------- */
+  function startApp(user){
+    CURRENT_USER = user;
+    document.getElementById('appRoot').classList.remove('hidden');
+    document.getElementById('userLabel').textContent = user.username;
+    var badge = document.createElement('span');
+    badge.className = 'role-badge';
+    badge.textContent = user.role;
+    document.getElementById('userLabel').appendChild(document.createTextNode(' '));
+    document.getElementById('userLabel').appendChild(badge);
 
-  var ATTACHMENT_CHECKS = {
-    grapple: [
-      "Grapple tips / teeth wear and cracks",
-      "Jaw alignment and full closure",
-      "Hydraulic cylinder leaks (grapple)",
-      "Hydraulic hoses and fittings (grapple)",
-      "Rotation motor / bearing function",
-      "Pins, bushings and retainers",
-      "Structural welds and frame condition"
-    ],
-    magnet: [
-      "Magnet face / plate condition (wear, cracks)",
-      "Lifting cable, chain and shackles",
-      "Power cable insulation and reel",
-      "Generator / power pack function",
-      "Controller, battery and warning lights",
-      "Cooling fan operation (if equipped)",
-      "Mounting yoke / lifting eye condition"
-    ]
-  };
+    if(user.role === 'admin'){
+      document.getElementById('tabUsersBtn').classList.remove('hidden');
+      document.getElementById('tabConfigBtn').classList.remove('hidden');
+    }
 
-  var ATTACHMENT_LABELS = { grapple: "Grapple", magnet: "Magnet" };
-
-  var DEFAULT_LINES = {
-    grapple: [
-      "Hydraulic line — open function",
-      "Hydraulic line — close function",
-      "Hydraulic line — rotation"
-    ],
-    magnet: [
-      "Main power cable",
-      "Control / signal cable",
-      "Cable reel slip ring connection"
-    ]
-  };
+    api('/api/config').then(function(config){
+      APP_CONFIG = config;
+      initFormFromConfig();
+    }).catch(function(e){
+      if(handleAuthLoss(e)) return;
+      console.error('Config load error', e);
+      showBanner('Could not load checklist configuration. Please refresh.', 'err');
+    });
+  }
 
   /* ---------------------------------------------------------
      STATE
   --------------------------------------------------------- */
-  // itemState keyed by "group:index" -> {status, notes, photo, label}
   var itemState = {};
-  // dynamic per-line checks for the currently selected attachment
   var attachmentLineState = [];
   var currentAttachmentKey = 'none';
+  var editingId = null; // set when admin is editing an existing inspection
 
   function resetItemState(){ itemState = {}; }
 
@@ -616,29 +795,66 @@
   }
 
   /* ---------------------------------------------------------
-     INIT: populate equipment dropdown
+     INIT FORM (once config is loaded)
   --------------------------------------------------------- */
-  var equipSelect = document.getElementById('fEquipType');
-  var histEquipFilter = document.getElementById('histFilterEquip');
-  Object.keys(EQUIPMENT_TYPES).forEach(function(key){
-    var opt = document.createElement('option');
-    opt.value = key;
-    opt.textContent = EQUIPMENT_TYPES[key].label;
-    equipSelect.appendChild(opt);
+  var equipSelect, histEquipFilter;
 
-    var opt2 = opt.cloneNode(true);
-    histEquipFilter.appendChild(opt2);
-  });
+  function initFormFromConfig(){
+    equipSelect = document.getElementById('fEquipType');
+    histEquipFilter = document.getElementById('histFilterEquip');
 
-  document.getElementById('fDate').valueAsDate = new Date();
+    equipSelect.innerHTML = '<option value="">Select equipment&hellip;</option>';
+    histEquipFilter.innerHTML = '<option value="">All equipment</option>';
+    Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
+      var opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = APP_CONFIG.equipmentTypes[key].label;
+      equipSelect.appendChild(opt);
+
+      var opt2 = opt.cloneNode(true);
+      histEquipFilter.appendChild(opt2);
+    });
+
+    var attachSelect = document.getElementById('fAttachment');
+    attachSelect.innerHTML = '<option value="none">None</option>';
+    Object.keys(APP_CONFIG.attachmentChecks).forEach(function(key){
+      var opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = APP_CONFIG.attachmentLabels[key] || key;
+      attachSelect.appendChild(opt);
+    });
+
+    document.getElementById('fDate').valueAsDate = new Date();
+
+    equipSelect.addEventListener('change', function(){
+      renderChecklist(equipSelect.value);
+    });
+    attachSelect.addEventListener('change', function(e){
+      renderAttachment(e.target.value, true);
+    });
+    document.getElementById('addLineBtn').addEventListener('click', function(){
+      attachmentLineState.push(makeLine('New line'));
+      renderLineChecks();
+    });
+
+    renderFluidItems();
+    renderChecklist('');
+    renderAttachment('none');
+
+    wireTabs();
+    wireHistory();
+    wireSaveAndPrint();
+    wireUsersAdmin();
+    wireConfigAdmin();
+  }
 
   /* ---------------------------------------------------------
-     RENDER: fluid items (static, rendered once)
+     RENDER: fluid items
   --------------------------------------------------------- */
   function renderFluidItems(){
     var container = document.getElementById('fluidItems');
     container.innerHTML = '';
-    FLUID_ITEMS.forEach(function(label, idx){
+    APP_CONFIG.fluidItems.forEach(function(label, idx){
       var key = 'fluid:' + idx;
       container.appendChild(buildItemRow(key, label, ['OK','Low','Added']));
     });
@@ -652,10 +868,10 @@
     var title = document.getElementById('checklistTitle');
     container.innerHTML = '';
 
-    var allItems = COMMON_ITEMS.slice();
-    if(equipKey && EQUIPMENT_TYPES[equipKey]){
-      allItems = allItems.concat(EQUIPMENT_TYPES[equipKey].items);
-      title.textContent = EQUIPMENT_TYPES[equipKey].label + " Inspection Checklist";
+    var allItems = APP_CONFIG.commonItems.slice();
+    if(equipKey && APP_CONFIG.equipmentTypes[equipKey]){
+      allItems = allItems.concat(APP_CONFIG.equipmentTypes[equipKey].items);
+      title.textContent = APP_CONFIG.equipmentTypes[equipKey].label + " Inspection Checklist";
     } else {
       title.textContent = "General Inspection Checklist";
     }
@@ -676,22 +892,22 @@
     var lineTitle = document.getElementById('lineChecksTitle');
     container.innerHTML = '';
 
-    if(!attachKey || attachKey === 'none' || !ATTACHMENT_CHECKS[attachKey]){
+    if(!attachKey || attachKey === 'none' || !APP_CONFIG.attachmentChecks[attachKey]){
       card.classList.add('hidden');
       currentAttachmentKey = 'none';
       attachmentLineState = [];
       return;
     }
     card.classList.remove('hidden');
-    title.textContent = ATTACHMENT_LABELS[attachKey] + " Attachment Checklist";
-    lineTitle.textContent = ATTACHMENT_LABELS[attachKey] + " Line Checks";
-    ATTACHMENT_CHECKS[attachKey].forEach(function(label, idx){
+    title.textContent = APP_CONFIG.attachmentLabels[attachKey] + " Attachment Checklist";
+    lineTitle.textContent = APP_CONFIG.attachmentLabels[attachKey] + " Line Checks";
+    APP_CONFIG.attachmentChecks[attachKey].forEach(function(label, idx){
       var key = 'attach:' + idx;
       container.appendChild(buildItemRow(key, label, ['OK','Needs Attention','N/A']));
     });
 
     if(resetLines !== false && attachKey !== currentAttachmentKey){
-      attachmentLineState = (DEFAULT_LINES[attachKey] || []).map(makeLine);
+      attachmentLineState = (APP_CONFIG.defaultLines[attachKey] || []).map(makeLine);
     }
     currentAttachmentKey = attachKey;
     renderLineChecks();
@@ -890,26 +1106,7 @@
   }
 
   /* ---------------------------------------------------------
-     Equipment / attachment change handlers
-  --------------------------------------------------------- */
-  equipSelect.addEventListener('change', function(){
-    renderChecklist(equipSelect.value);
-  });
-  document.getElementById('fAttachment').addEventListener('change', function(e){
-    renderAttachment(e.target.value, true);
-  });
-
-  document.getElementById('addLineBtn').addEventListener('click', function(){
-    attachmentLineState.push(makeLine('New line'));
-    renderLineChecks();
-  });
-
-  renderFluidItems();
-  renderChecklist('');
-  renderAttachment('none');
-
-  /* ---------------------------------------------------------
-     Banner helper
+     Banner helper (main app banner)
   --------------------------------------------------------- */
   function showBanner(msg, type){
     var b = document.getElementById('banner');
@@ -941,27 +1138,26 @@
       return out;
     }
 
-    var checklistLabels = COMMON_ITEMS.slice();
-    if(equipKey && EQUIPMENT_TYPES[equipKey]) checklistLabels = checklistLabels.concat(EQUIPMENT_TYPES[equipKey].items);
+    var checklistLabels = APP_CONFIG.commonItems.slice();
+    if(equipKey && APP_CONFIG.equipmentTypes[equipKey]) checklistLabels = checklistLabels.concat(APP_CONFIG.equipmentTypes[equipKey].items);
 
     var record = {
-      id: 'insp_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+      id: editingId || undefined,
       equipmentType: equipKey,
-      equipmentLabel: equipKey ? EQUIPMENT_TYPES[equipKey].label : '',
+      equipmentLabel: equipKey ? APP_CONFIG.equipmentTypes[equipKey].label : '',
       unitId: document.getElementById('fUnitId').value.trim(),
       hours: document.getElementById('fHours').value,
       operator: document.getElementById('fOperator').value.trim(),
       date: document.getElementById('fDate').value,
       shift: document.getElementById('fShift').value,
       attachment: attachKey,
-      fluids: collectGroup('fluid', FLUID_ITEMS),
+      fluids: collectGroup('fluid', APP_CONFIG.fluidItems),
       checklist: collectGroup('check', checklistLabels),
-      attachmentChecklist: (attachKey !== 'none' && ATTACHMENT_CHECKS[attachKey]) ? collectGroup('attach', ATTACHMENT_CHECKS[attachKey]) : [],
+      attachmentChecklist: (attachKey !== 'none' && APP_CONFIG.attachmentChecks[attachKey]) ? collectGroup('attach', APP_CONFIG.attachmentChecks[attachKey]) : [],
       attachmentLines: (attachKey !== 'none') ? attachmentLineState.map(function(l){
         return { label: l.label, status: l.status, notes: l.notes, photo: l.photo };
       }) : [],
-      comments: document.getElementById('fComments').value.trim(),
-      savedAt: new Date().toISOString()
+      comments: document.getElementById('fComments').value.trim()
     };
     return record;
   }
@@ -986,35 +1182,40 @@
   }
 
   /* ---------------------------------------------------------
-     Save to persistent storage
+     Save / clear / print
   --------------------------------------------------------- */
+  function wireSaveAndPrint(){
+    document.getElementById('saveBtn').addEventListener('click', saveInspection);
+    document.getElementById('clearFormBtn').addEventListener('click', function(){ clearForm(true); });
+    document.getElementById('cancelEditBtn').addEventListener('click', function(){ clearForm(false); });
+    document.getElementById('printCurrentBtn').addEventListener('click', function(){
+      var record = collectRecord();
+      printRecord(record);
+    });
+  }
+
   function saveInspection(){
     var record = collectRecord();
     var err = validateRecord(record);
     if(err){ showBanner(err, 'err'); return; }
 
-    fetch('/api/inspections', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(record)
-    })
-      .then(function(res){
-        if(!res.ok) return res.json().then(function(body){ throw new Error(body.error || 'Save failed'); });
-        return res.json();
-      })
+    api('/api/inspections', { method: 'POST', body: JSON.stringify(record) })
       .then(function(){
-        showBanner('Inspection saved' + (hasAnyFail(record) ? ' — flagged items need attention.' : '.'), hasAnyFail(record) ? 'err' : 'ok');
+        showBanner((editingId ? 'Inspection updated' : 'Inspection saved') + (hasAnyFail(record) ? ' — flagged items need attention.' : '.'), hasAnyFail(record) ? 'err' : 'ok');
         clearForm(false);
       })
       .catch(function(e){
+        if(handleAuthLoss(e)) return;
         console.error('Save error', e);
-        showBanner('Could not save inspection. Please try again.', 'err');
+        showBanner(e.message || 'Could not save inspection. Please try again.', 'err');
       });
   }
 
   function clearForm(confirmFirst){
     if(confirmFirst && !window.confirm('Clear all fields on this form?')) return;
     resetItemState();
+    editingId = null;
+    document.getElementById('editNotice').classList.add('hidden');
     document.getElementById('fUnitId').value = '';
     document.getElementById('fHours').value = '';
     document.getElementById('fOperator').value = '';
@@ -1030,8 +1231,52 @@
     renderAttachment('none');
   }
 
-  document.getElementById('saveBtn').addEventListener('click', saveInspection);
-  document.getElementById('clearFormBtn').addEventListener('click', function(){ clearForm(true); });
+  function loadRecordIntoForm(record){
+    resetItemState();
+    editingId = record.id;
+    document.getElementById('editNotice').classList.remove('hidden');
+    document.getElementById('editNoticeId').textContent = record.unitId + ' — ' + record.date;
+
+    document.getElementById('fUnitId').value = record.unitId || '';
+    document.getElementById('fHours').value = record.hours || '';
+    document.getElementById('fOperator').value = record.operator || '';
+    document.getElementById('fDate').value = record.date || '';
+    document.getElementById('fShift').value = record.shift || 'Day';
+    document.getElementById('fComments').value = record.comments || '';
+    equipSelect.value = record.equipmentType || '';
+
+    renderFluidItems();
+    (record.fluids || []).forEach(function(item, idx){
+      var st = getState('fluid:' + idx);
+      st.status = item.status || ''; st.notes = item.notes || ''; st.photo = item.photo || null;
+    });
+    renderFluidItems();
+
+    renderChecklist(record.equipmentType || '');
+    (record.checklist || []).forEach(function(item, idx){
+      var st = getState('check:' + idx);
+      st.status = item.status || ''; st.notes = item.notes || ''; st.photo = item.photo || null;
+    });
+    renderChecklist(record.equipmentType || '');
+
+    document.getElementById('fAttachment').value = record.attachment || 'none';
+    renderAttachment(record.attachment || 'none', true);
+    (record.attachmentChecklist || []).forEach(function(item, idx){
+      var st = getState('attach:' + idx);
+      st.status = item.status || ''; st.notes = item.notes || ''; st.photo = item.photo || null;
+    });
+    renderAttachment(record.attachment || 'none', false);
+
+    if(record.attachmentLines && record.attachmentLines.length){
+      attachmentLineState = record.attachmentLines.map(function(l){
+        return { id: 'line_' + Math.random().toString(36).slice(2,9), label: l.label, status: l.status || '', notes: l.notes || '', photo: l.photo || null };
+      });
+      renderLineChecks();
+    }
+
+    document.getElementById('tabNewBtn').click();
+    window.scrollTo(0, 0);
+  }
 
   /* ---------------------------------------------------------
      Printing
@@ -1060,16 +1305,16 @@
     html += printRow('Equipment Type', record.equipmentLabel || record.equipmentType) + printRow('Unit / Asset #', record.unitId);
     html += printRow('Operator', record.operator) + printRow('Date', record.date);
     html += printRow('Shift', record.shift) + printRow('Hour Meter', record.hours);
-    html += printRow('Attachment', record.attachment && record.attachment !== 'none' ? (ATTACHMENT_LABELS[record.attachment] || record.attachment) : 'None');
+    html += printRow('Attachment', record.attachment && record.attachment !== 'none' ? (APP_CONFIG.attachmentLabels[record.attachment] || record.attachment) : 'None');
     html += '</table>';
 
     html += printSection('Fluid &amp; Lubrication Checks', record.fluids);
     html += printSection('Inspection Checklist', record.checklist);
     if(record.attachmentChecklist && record.attachmentChecklist.length){
-      html += printSection((ATTACHMENT_LABELS[record.attachment] || 'Attachment') + ' Checklist', record.attachmentChecklist);
+      html += printSection((APP_CONFIG.attachmentLabels[record.attachment] || 'Attachment') + ' Checklist', record.attachmentChecklist);
     }
     if(record.attachmentLines && record.attachmentLines.length){
-      html += printSection((ATTACHMENT_LABELS[record.attachment] || 'Attachment') + ' Line Checks', record.attachmentLines);
+      html += printSection((APP_CONFIG.attachmentLabels[record.attachment] || 'Attachment') + ' Line Checks', record.attachmentLines);
     }
 
     html += '<h3 style="color:#213B34; border-bottom:1px solid #A1CEAD; padding-bottom:4px;">General Comments</h3>';
@@ -1109,46 +1354,50 @@
     window.print();
   }
 
-  document.getElementById('printCurrentBtn').addEventListener('click', function(){
-    var record = collectRecord();
-    printRecord(record);
-  });
-
   /* ---------------------------------------------------------
      Tabs
   --------------------------------------------------------- */
-  var tabNewBtn = document.getElementById('tabNewBtn');
-  var tabHistBtn = document.getElementById('tabHistBtn');
-  var viewNew = document.getElementById('viewNew');
-  var viewHist = document.getElementById('viewHist');
-
-  tabNewBtn.addEventListener('click', function(){
-    tabNewBtn.classList.add('active');
-    tabHistBtn.classList.remove('active');
-    viewNew.classList.remove('hidden');
-    viewHist.classList.add('hidden');
-  });
-  tabHistBtn.addEventListener('click', function(){
-    tabHistBtn.classList.add('active');
-    tabNewBtn.classList.remove('active');
-    viewHist.classList.remove('hidden');
-    viewNew.classList.add('hidden');
-    loadHistory();
-  });
+  function wireTabs(){
+    var tabs = {
+      tabNewBtn: 'viewNew',
+      tabHistBtn: 'viewHist',
+      tabUsersBtn: 'viewUsers',
+      tabConfigBtn: 'viewConfig'
+    };
+    Object.keys(tabs).forEach(function(btnId){
+      document.getElementById(btnId).addEventListener('click', function(){
+        Object.keys(tabs).forEach(function(otherBtnId){
+          document.getElementById(otherBtnId).classList.toggle('active', otherBtnId === btnId);
+          document.getElementById(tabs[otherBtnId]).classList.toggle('hidden', otherBtnId !== btnId);
+        });
+        if(btnId === 'tabHistBtn') loadHistory();
+        if(btnId === 'tabUsersBtn') loadUsers();
+        if(btnId === 'tabConfigBtn') loadConfigEditor();
+      });
+    });
+  }
 
   /* ---------------------------------------------------------
      History list
   --------------------------------------------------------- */
   var historyIndexCache = [];
 
+  function wireHistory(){
+    document.getElementById('histFilterEquip').addEventListener('change', renderHistoryList);
+    document.getElementById('histFilterUnit').addEventListener('input', renderHistoryList);
+    document.getElementById('histFilterFlag').addEventListener('change', renderHistoryList);
+    document.getElementById('closeModalBtn').addEventListener('click', function(){
+      document.getElementById('detailModal').classList.add('hidden');
+    });
+    document.getElementById('detailModal').addEventListener('click', function(e){
+      if(e.target === document.getElementById('detailModal')) e.currentTarget.classList.add('hidden');
+    });
+  }
+
   function loadHistory(){
     var list = document.getElementById('histList');
     list.innerHTML = '<div class="empty-state">Loading inspection history&hellip;</div>';
-    fetch('/api/inspections')
-      .then(function(res){
-        if(!res.ok) throw new Error('Failed to load history');
-        return res.json();
-      })
+    api('/api/inspections')
       .then(function(rows){
         historyIndexCache = rows.map(function(r){
           return {
@@ -1162,12 +1411,14 @@
             hours: r.hours,
             attachment: r.attachment,
             hasFail: r.has_fail,
-            savedAt: r.saved_at
+            savedAt: r.saved_at,
+            createdBy: r.created_by
           };
         });
         renderHistoryList();
       })
       .catch(function(e){
+        if(handleAuthLoss(e)) return;
         console.error('History load error', e);
         historyIndexCache = [];
         list.innerHTML = '<div class="empty-state">Could not load inspection history. Please try again.</div>';
@@ -1201,8 +1452,9 @@
       meta.className = 'hist-meta';
       meta.innerHTML = '<strong>' + escapeHtml(r.equipmentLabel) + ' &mdash; ' + escapeHtml(r.unitId) + '</strong><br>' +
         escapeHtml(r.date) + ' &middot; ' + escapeHtml(r.shift) + ' shift &middot; ' + escapeHtml(r.operator) +
+        (r.createdBy ? ' &middot; logged by ' + escapeHtml(r.createdBy) : '') +
         '<div class="hist-flags">' + (r.hasFail ? '<span class="tag fail">Needs attention</span>' : '<span class="tag ok">All clear</span>') +
-        (r.attachment && r.attachment !== 'none' ? '<span class="tag ok" style="background:#7CC5EB; color:#213B34;">' + escapeHtml(ATTACHMENT_LABELS[r.attachment] || r.attachment) + '</span>' : '') +
+        (r.attachment && r.attachment !== 'none' && APP_CONFIG.attachmentLabels[r.attachment] ? '<span class="tag ok" style="background:#7CC5EB; color:#213B34;">' + escapeHtml(APP_CONFIG.attachmentLabels[r.attachment]) + '</span>' : '') +
         '</div>';
       row.appendChild(meta);
 
@@ -1223,66 +1475,211 @@
       printBtn.style.border = 'none';
       printBtn.style.color = '#fff';
       printBtn.addEventListener('click', function(){
-        fetch('/api/inspection?id=' + encodeURIComponent(r.id))
-          .then(function(res){ if(!res.ok) throw new Error('not found'); return res.json(); })
+        api('/api/inspection?id=' + encodeURIComponent(r.id))
           .then(function(record){ printRecord(record); })
-          .catch(function(e){ console.error('Print load error', e); showBanner('Could not load that inspection.', 'err'); });
+          .catch(function(e){ if(handleAuthLoss(e)) return; console.error('Print load error', e); showBanner('Could not load that inspection.', 'err'); });
       });
       btns.appendChild(printBtn);
+
+      if(CURRENT_USER && CURRENT_USER.role === 'admin'){
+        var editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.style.background = '#fff';
+        editBtn.style.border = '1px solid ' + '#B5720A';
+        editBtn.style.color = '#B5720A';
+        editBtn.addEventListener('click', function(){
+          api('/api/inspection?id=' + encodeURIComponent(r.id))
+            .then(function(record){ loadRecordIntoForm(record); })
+            .catch(function(e){ if(handleAuthLoss(e)) return; showBanner('Could not load that inspection.', 'err'); });
+        });
+        btns.appendChild(editBtn);
+
+        var delBtn = document.createElement('button');
+        delBtn.className = 'danger';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', function(){
+          if(!window.confirm('Delete this inspection permanently? This cannot be undone.')) return;
+          api('/api/inspections?id=' + encodeURIComponent(r.id), { method: 'DELETE' })
+            .then(function(){ loadHistory(); })
+            .catch(function(e){ if(handleAuthLoss(e)) return; showBanner('Could not delete that inspection.', 'err'); });
+        });
+        btns.appendChild(delBtn);
+      }
 
       row.appendChild(btns);
       list.appendChild(row);
     });
   }
 
-  document.getElementById('histFilterEquip').addEventListener('change', renderHistoryList);
-  document.getElementById('histFilterUnit').addEventListener('input', renderHistoryList);
-  document.getElementById('histFilterFlag').addEventListener('change', renderHistoryList);
-
   function openDetail(id){
-    fetch('/api/inspection?id=' + encodeURIComponent(id))
-      .then(function(res){ if(!res.ok) throw new Error('not found'); return res.json(); })
+    api('/api/inspection?id=' + encodeURIComponent(id))
       .then(function(record){
-      var content = document.getElementById('detailContent');
-      var html = '<h2>' + escapeHtml(record.equipmentLabel) + ' &mdash; ' + escapeHtml(record.unitId) + '</h2>';
-      html += '<p style="font-size:13px; color:#4B5A54;">' + escapeHtml(record.date) + ' &middot; ' + escapeHtml(record.shift) + ' shift &middot; Operator: ' + escapeHtml(record.operator) + ' &middot; Hours: ' + escapeHtml(record.hours || '—') + '</p>';
+        var content = document.getElementById('detailContent');
+        var html = '<h2>' + escapeHtml(record.equipmentLabel) + ' &mdash; ' + escapeHtml(record.unitId) + '</h2>';
+        html += '<p style="font-size:13px; color:#4B5A54;">' + escapeHtml(record.date) + ' &middot; ' + escapeHtml(record.shift) + ' shift &middot; Operator: ' + escapeHtml(record.operator) + ' &middot; Hours: ' + escapeHtml(record.hours || '—') + (record.createdBy ? ' &middot; Logged by ' + escapeHtml(record.createdBy) : '') + '</p>';
 
-      function renderDetailGroup(title, items){
-        var h = '<h3 style="color:#213B34;">' + title + '</h3>';
-        items.forEach(function(it){
-          h += '<div class="detail-item"><strong>' + escapeHtml(it.label) + '</strong> — ' + (it.status || 'Not checked');
-          if(it.notes) h += '<div>' + escapeHtml(it.notes) + '</div>';
-          if(it.photo) h += '<img src="' + it.photo + '">';
-          h += '</div>';
+        function renderDetailGroup(title, items){
+          var h = '<h3 style="color:#213B34;">' + title + '</h3>';
+          items.forEach(function(it){
+            h += '<div class="detail-item"><strong>' + escapeHtml(it.label) + '</strong> — ' + (it.status || 'Not checked');
+            if(it.notes) h += '<div>' + escapeHtml(it.notes) + '</div>';
+            if(it.photo) h += '<img src="' + it.photo + '">';
+            h += '</div>';
+          });
+          return h;
+        }
+
+        html += renderDetailGroup('Fluid Checks', record.fluids);
+        html += renderDetailGroup('Inspection Checklist', record.checklist);
+        if(record.attachmentChecklist && record.attachmentChecklist.length){
+          html += renderDetailGroup((APP_CONFIG.attachmentLabels[record.attachment] || 'Attachment') + ' Checklist', record.attachmentChecklist);
+        }
+        if(record.attachmentLines && record.attachmentLines.length){
+          html += renderDetailGroup((APP_CONFIG.attachmentLabels[record.attachment] || 'Attachment') + ' Line Checks', record.attachmentLines);
+        }
+        html += '<h3 style="color:#213B34;">Comments</h3><p>' + (escapeHtml(record.comments) || '<em>None</em>') + '</p>';
+
+        content.innerHTML = html;
+        document.getElementById('detailModal').classList.remove('hidden');
+      })
+      .catch(function(e){
+        if(handleAuthLoss(e)) return;
+        console.error('Detail load error', e);
+        showBanner('Could not load that inspection.', 'err');
+      });
+  }
+
+  /* ---------------------------------------------------------
+     Users admin
+  --------------------------------------------------------- */
+  function wireUsersAdmin(){
+    document.getElementById('addUserBtn').addEventListener('click', function(){
+      clearBannerIn('userBanner');
+      var username = document.getElementById('newUserName').value.trim();
+      var password = document.getElementById('newUserPassword').value;
+      var role = document.getElementById('newUserRole').value;
+      if(!username || !password){ showBannerIn('userBanner', 'Username and password are required.', 'err'); return; }
+      if(password.length < 8){ showBannerIn('userBanner', 'Password must be at least 8 characters.', 'err'); return; }
+      api('/api/users', { method: 'POST', body: JSON.stringify({ username: username, password: password, role: role }) })
+        .then(function(){
+          document.getElementById('newUserName').value = '';
+          document.getElementById('newUserPassword').value = '';
+          document.getElementById('newUserRole').value = 'general';
+          showBannerIn('userBanner', 'User added.', 'ok');
+          loadUsers();
+        })
+        .catch(function(e){
+          if(handleAuthLoss(e)) return;
+          showBannerIn('userBanner', e.message || 'Could not add user.', 'err');
         });
-        return h;
-      }
-
-      html += renderDetailGroup('Fluid Checks', record.fluids);
-      html += renderDetailGroup('Inspection Checklist', record.checklist);
-      if(record.attachmentChecklist && record.attachmentChecklist.length){
-        html += renderDetailGroup((ATTACHMENT_LABELS[record.attachment] || 'Attachment') + ' Checklist', record.attachmentChecklist);
-      }
-      if(record.attachmentLines && record.attachmentLines.length){
-        html += renderDetailGroup((ATTACHMENT_LABELS[record.attachment] || 'Attachment') + ' Line Checks', record.attachmentLines);
-      }
-      html += '<h3 style="color:#213B34;">Comments</h3><p>' + (escapeHtml(record.comments) || '<em>None</em>') + '</p>';
-
-      content.innerHTML = html;
-      document.getElementById('detailModal').classList.remove('hidden');
-    })
-    .catch(function(e){
-      console.error('Detail load error', e);
-      showBanner('Could not load that inspection.', 'err');
     });
   }
 
-  document.getElementById('closeModalBtn').addEventListener('click', function(){
-    document.getElementById('detailModal').classList.add('hidden');
-  });
-  document.getElementById('detailModal').addEventListener('click', function(e){
-    if(e.target === document.getElementById('detailModal')) e.currentTarget.classList.add('hidden');
-  });
+  function loadUsers(){
+    var list = document.getElementById('usersList');
+    list.innerHTML = '<div class="empty-state">Loading users&hellip;</div>';
+    api('/api/users')
+      .then(function(rows){
+        list.innerHTML = '';
+        if(!rows.length){ list.innerHTML = '<div class="empty-state">No users yet.</div>'; return; }
+        rows.forEach(function(u){
+          var row = document.createElement('div');
+          row.className = 'user-row';
+          var info = document.createElement('div');
+          info.innerHTML = '<strong>' + escapeHtml(u.username) + '</strong> <span class="tag ' + (u.role === 'admin' ? 'fail' : 'ok') + '" style="margin-left:6px;">' + escapeHtml(u.role) + '</span>';
+          row.appendChild(info);
+
+          if(CURRENT_USER && u.id !== CURRENT_USER.id){
+            var delBtn = document.createElement('button');
+            delBtn.className = 'danger';
+            delBtn.textContent = 'Remove';
+            delBtn.addEventListener('click', function(){
+              if(!window.confirm('Remove user "' + u.username + '"? They will no longer be able to sign in.')) return;
+              api('/api/users?id=' + encodeURIComponent(u.id), { method: 'DELETE' })
+                .then(function(){ loadUsers(); })
+                .catch(function(e){ if(handleAuthLoss(e)) return; showBannerIn('userBanner', e.message || 'Could not remove user.', 'err'); });
+            });
+            row.appendChild(delBtn);
+          }
+          list.appendChild(row);
+        });
+      })
+      .catch(function(e){
+        if(handleAuthLoss(e)) return;
+        list.innerHTML = '<div class="empty-state">Could not load users.</div>';
+      });
+  }
+
+  /* ---------------------------------------------------------
+     Checklist config admin
+  --------------------------------------------------------- */
+  function wireConfigAdmin(){
+    document.getElementById('saveConfigBtn').addEventListener('click', function(){
+      clearBannerIn('configBanner');
+      var raw = document.getElementById('configEditor').value;
+      var parsed;
+      try{ parsed = JSON.parse(raw); }
+      catch(e){ showBannerIn('configBanner', 'That is not valid JSON: ' + e.message, 'err'); return; }
+      api('/api/config', { method: 'PUT', body: JSON.stringify(parsed) })
+        .then(function(){
+          showBannerIn('configBanner', 'Checklist configuration saved. Reloading it into the app…', 'ok');
+          return api('/api/config');
+        })
+        .then(function(config){
+          APP_CONFIG = config;
+          initFormFromConfig.__reentrant = true;
+          // Re-render the parts of the New Inspection form driven by config,
+          // without re-binding all the one-time event listeners.
+          equipSelect.innerHTML = '<option value="">Select equipment&hellip;</option>';
+          histEquipFilter.innerHTML = '<option value="">All equipment</option>';
+          Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = APP_CONFIG.equipmentTypes[key].label;
+            equipSelect.appendChild(opt);
+            histEquipFilter.appendChild(opt.cloneNode(true));
+          });
+          var attachSelect = document.getElementById('fAttachment');
+          attachSelect.innerHTML = '<option value="none">None</option>';
+          Object.keys(APP_CONFIG.attachmentChecks).forEach(function(key){
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = APP_CONFIG.attachmentLabels[key] || key;
+            attachSelect.appendChild(opt);
+          });
+          renderFluidItems();
+          renderChecklist('');
+          renderAttachment('none');
+        })
+        .catch(function(e){
+          if(handleAuthLoss(e)) return;
+          showBannerIn('configBanner', e.message || 'Could not save configuration.', 'err');
+        });
+    });
+
+    document.getElementById('resetConfigBtn').addEventListener('click', function(){
+      if(!window.confirm('Reset the checklist configuration to the built-in defaults? This discards any customization.')) return;
+      api('/api/config', { method: 'DELETE' })
+        .then(function(config){
+          APP_CONFIG = config;
+          document.getElementById('configEditor').value = JSON.stringify(config, null, 2);
+          showBannerIn('configBanner', 'Reset to defaults. Click "Save configuration" again if you want to make further edits, or navigate away — the reset is already applied.', 'ok');
+        })
+        .catch(function(e){
+          if(handleAuthLoss(e)) return;
+          showBannerIn('configBanner', e.message || 'Could not reset configuration.', 'err');
+        });
+    });
+  }
+
+  function loadConfigEditor(){
+    document.getElementById('configEditor').value = JSON.stringify(APP_CONFIG, null, 2);
+  }
+
+  /* ---------------------------------------------------------
+     GO
+  --------------------------------------------------------- */
+  boot();
 
 })();
 </script>

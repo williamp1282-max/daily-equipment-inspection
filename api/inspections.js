@@ -1,4 +1,5 @@
 import { sql, ensureTable, computeHasFail } from '../lib/db.js';
+import { requireAuth, requireAdmin } from '../lib/auth.js';
 
 const REQUIRED_FIELDS = ['equipmentType', 'unitId', 'operator', 'date'];
 
@@ -7,12 +8,12 @@ export default async function handler(req, res) {
     await ensureTable();
 
     if (req.method === 'GET') {
-      // Return a lightweight summary list (no photos / notes payload) —
-      // the client filters this in-browser, same as the full detail record
-      // fetched separately per inspection. Capped at 1000 most recent.
+      const user = requireAuth(req, res);
+      if (!user) return;
+
       const result = await sql`
         SELECT id, equipment_type, equipment_label, unit_id, operator,
-               inspection_date, shift, hours, attachment, has_fail, saved_at
+               inspection_date, shift, hours, attachment, has_fail, saved_at, created_by
         FROM inspections
         ORDER BY saved_at DESC
         LIMIT 1000;
@@ -22,8 +23,10 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const record = req.body;
+      const user = requireAuth(req, res);
+      if (!user) return;
 
+      const record = req.body;
       if (!record || typeof record !== 'object') {
         res.status(400).json({ error: 'Request body must be a JSON inspection record.' });
         return;
@@ -35,21 +38,34 @@ export default async function handler(req, res) {
         return;
       }
 
-      const id = typeof record.id === 'string' && record.id
-        ? record.id
-        : 'insp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+      const providedId = typeof record.id === 'string' && record.id ? record.id : null;
+      let existing = null;
+      if (providedId) {
+        const existingResult = await sql`SELECT created_by FROM inspections WHERE id = ${providedId} LIMIT 1;`;
+        existing = existingResult.rows[0] || null;
+      }
+
+      // Editing an inspection that already exists is an admin-only action.
+      // Creating a brand-new inspection is open to any signed-in user.
+      if (existing && user.role !== 'admin') {
+        res.status(403).json({ error: 'Only admins can edit an existing inspection.' });
+        return;
+      }
+
+      const id = providedId || ('insp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8));
       const savedAt = new Date().toISOString();
       const hasFail = computeHasFail(record);
-      const fullRecord = { ...record, id, savedAt };
+      const createdBy = existing ? existing.created_by : user.username;
+      const fullRecord = { ...record, id, savedAt, createdBy };
 
       await sql`
         INSERT INTO inspections (
           id, equipment_type, equipment_label, unit_id, operator,
-          inspection_date, shift, hours, attachment, has_fail, saved_at, data
+          inspection_date, shift, hours, attachment, has_fail, saved_at, created_by, data
         ) VALUES (
           ${id}, ${record.equipmentType}, ${record.equipmentLabel || ''}, ${record.unitId}, ${record.operator},
           ${record.date}, ${record.shift || ''}, ${record.hours || ''}, ${record.attachment || 'none'},
-          ${hasFail}, ${savedAt}, ${JSON.stringify(fullRecord)}
+          ${hasFail}, ${savedAt}, ${createdBy}, ${JSON.stringify(fullRecord)}
         )
         ON CONFLICT (id) DO UPDATE SET
           equipment_type = EXCLUDED.equipment_type,
@@ -61,6 +77,7 @@ export default async function handler(req, res) {
           hours = EXCLUDED.hours,
           attachment = EXCLUDED.attachment,
           has_fail = EXCLUDED.has_fail,
+          saved_at = EXCLUDED.saved_at,
           data = EXCLUDED.data;
       `;
 
@@ -68,7 +85,21 @@ export default async function handler(req, res) {
       return;
     }
 
-    res.setHeader('Allow', 'GET, POST');
+    if (req.method === 'DELETE') {
+      const admin = requireAdmin(req, res);
+      if (!admin) return;
+
+      const { id } = req.query;
+      if (!id) {
+        res.status(400).json({ error: 'Missing id' });
+        return;
+      }
+      await sql`DELETE FROM inspections WHERE id = ${id};`;
+      res.status(200).json({ ok: true });
+      return;
+    }
+
+    res.setHeader('Allow', 'GET, POST, DELETE');
     res.status(405).json({ error: 'Method not allowed' });
   } catch (err) {
     console.error('inspections handler error', err);

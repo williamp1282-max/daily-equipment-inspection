@@ -1,7 +1,6 @@
--- Reference schema for the inspections table.
--- You do NOT need to run this by hand — the app creates this table
--- automatically (CREATE TABLE IF NOT EXISTS) the first time any API
--- route runs. It's included here for documentation/reference only.
+-- Reference schema. You do NOT need to run this by hand — the app creates
+-- these tables automatically (CREATE TABLE IF NOT EXISTS) the first time
+-- any API route runs. Included here for documentation only.
 
 CREATE TABLE IF NOT EXISTS inspections (
   id               TEXT PRIMARY KEY,
@@ -15,7 +14,20 @@ CREATE TABLE IF NOT EXISTS inspections (
   attachment       TEXT,
   has_fail         BOOLEAN,
   saved_at         TIMESTAMPTZ,
-  data             JSONB NOT NULL  -- full inspection record: fluids, checklist, photos, comments, etc.
+  created_by       TEXT,           -- username of whoever logged this inspection
+  data             JSONB NOT NULL  -- full record: fluids, checklist, photos, comments, etc.
+);
+CREATE INDEX IF NOT EXISTS inspections_saved_at_idx ON inspections (saved_at DESC);
+
+CREATE TABLE IF NOT EXISTS users (
+  id            TEXT PRIMARY KEY,
+  username      TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,     -- bcrypt hash, never plaintext
+  role          TEXT NOT NULL DEFAULT 'general',  -- 'admin' | 'general'
+  created_at    TIMESTAMPTZ
 );
 
-CREATE INDEX IF NOT EXISTS inspections_saved_at_idx ON inspections (saved_at DESC);
+CREATE TABLE IF NOT EXISTS app_config (
+  key   TEXT PRIMARY KEY,   -- currently only 'checklist_config'
+  value JSONB NOT NULL      -- equipment types, checklist items, fluids, attachments
+);

@@ -1,4 +1,5 @@
 import { sql, ensureTable } from '../lib/db.js';
+import { requireAuth } from '../lib/auth.js';
 
 export default async function handler(req, res) {
   try {
@@ -9,6 +10,9 @@ export default async function handler(req, res) {
       res.status(405).json({ error: 'Method not allowed' });
       return;
     }
+
+    const user = requireAuth(req, res);
+    if (!user) return;
 
     const { id } = req.query;
     if (!id) {

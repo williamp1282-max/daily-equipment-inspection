@@ -1,34 +1,53 @@
 # Daily Equipment Inspection
 
-A server-based daily equipment inspection app. Inspections (equipment info,
-fluid checks, inspection checklist, attachment checklist, photos, comments)
-are stored in a real Postgres database on the server — not in the browser —
-so records persist across devices and are shared by everyone using the app.
+A server-based daily equipment inspection app with individual accounts and
+two roles: **admin** and **general user**. Inspections (equipment info,
+fluid checks, checklist, attachment checks, photos, comments) are stored in
+a real Postgres database — not in the browser — so records persist across
+devices and are shared by everyone using the app.
+
+## Roles
+
+- **General users** can sign in, log new inspections, and view/print inspection history.
+- **Admins** can additionally: edit or delete any inspection, add/remove user accounts, and edit the checklist configuration (equipment types, checklist items, fluid checks, attachments) — all from within the app, no code changes needed.
+
+The very first account created (via the one-time setup screen the app shows when no users exist yet) is automatically an admin.
 
 ## How it's built
 
-- **Frontend:** a single static page, `index.html` (vanilla JS, no build step).
-- **Backend:** two Vercel serverless functions in `/api`:
-  - `GET/POST /api/inspections` — list inspection summaries / save a new inspection
-  - `GET /api/inspections/:id` — fetch one full inspection record (with photos)
-- **Database:** Postgres, accessed via `@vercel/postgres`. The `inspections`
-  table is created automatically the first time the app runs — you don't
-  need to run any SQL yourself (see `schema.sql` for reference).
+- **Frontend:** a single static page, `index.html` (vanilla JS, no build step). Shows a login/setup screen until you're signed in.
+- **Backend:** Vercel serverless functions in `/api`:
+  - `GET/POST /api/auth` — setup, login, logout, change password
+  - `GET/POST/DELETE /api/users` — admin-only user management
+  - `GET/PUT/DELETE /api/config` — checklist configuration (any signed-in user can read it, only admins can change it)
+  - `GET/POST/DELETE /api/inspections` — list, create (any signed-in user), delete (admin only); posting with an existing inspection's id is treated as an edit and is admin-only
+  - `GET /api/inspection` — fetch one full inspection record (`?id=...`)
+- **Database:** Postgres via the standard `pg` driver (works with Neon, Supabase, or any Postgres — see setup below). Tables are created automatically the first time the app runs.
+- **Auth:** bcrypt-hashed passwords, JWT session tokens in an httpOnly cookie.
 
 ## One-time setup after deploying
 
-The app needs a Postgres database connected to the Vercel project:
+### 1. Add a Postgres database
 
-1. In the Vercel dashboard, open this project.
-2. Go to **Storage** → **Create Database** → choose **Postgres** (Neon).
-3. Follow the prompts to create it and connect it to this project. Vercel
-   will automatically add the `POSTGRES_URL` (and related) environment
-   variables — no manual configuration needed.
-4. Redeploy the project (or just wait for the next deploy) so the function
-   picks up the new environment variables.
+Vercel's own "Postgres" storage product is now Neon under the Vercel Marketplace. In the Vercel dashboard, open this project → **Storage** → **Create Database** → **Neon** (or **Marketplace Database Providers** → Neon/Supabase — whichever your dashboard shows), and connect it to this project. This auto-injects a `DATABASE_URL` (or `POSTGRES_URL`) environment variable — the app reads either.
 
-That's it — the next time anyone saves an inspection, the app creates the
-`inspections` table automatically.
+### 2. Add a JWT secret
+
+In **Settings → Environment Variables**, add:
+
+```
+JWT_SECRET = <any long random string>
+```
+
+This signs login session tokens. You can generate one with `openssl rand -base64 32` in a terminal, or just mash the keyboard for 40+ characters — it just needs to be secret and stay the same across deploys.
+
+### 3. Redeploy
+
+Redeploy (or push a commit) so the function picks up the new environment variables.
+
+### 4. Create the first admin account
+
+Visit the deployed app. Since no users exist yet, it will show a "Create the first admin account" screen instead of a login form. Whatever account you create here is an admin, and can add more users (admin or general) from the **Users** tab afterward.
 
 ## Local development
 
@@ -37,13 +56,9 @@ npm install
 npx vercel dev
 ```
 
-You'll need to link the project to Vercel (`npx vercel link`) and pull env
-vars (`npx vercel env pull`) first so `POSTGRES_URL` is available locally.
+You'll need to link the project to Vercel (`npx vercel link`) and pull env vars (`npx vercel env pull`) first so `DATABASE_URL` and `JWT_SECRET` are available locally.
 
 ## Notes
 
-- Photos are compressed client-side (resized + JPEG-compressed) before
-  upload and stored as part of the inspection record in the database.
-- The equipment types, checklist items, and attachment configurations are
-  defined in the `<script>` block in `index.html` — edit the `EQUIPMENT_TYPES`,
-  `FLUID_ITEMS`, and `ATTACHMENT_CHECKS` objects there to customize.
+- Photos are compressed client-side (resized + JPEG-compressed) before upload and stored as part of the inspection record in the database.
+- Equipment types, checklist items, fluid checks, and attachment checklists are no longer hardcoded — admins manage them from the **Checklist Setup** tab in the app (edited as JSON). `DEFAULT_CONFIG` in `lib/db.js` is the fallback/reset-to-defaults value.
