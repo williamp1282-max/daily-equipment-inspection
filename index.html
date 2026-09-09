@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Equipment Inspection</title>
+<style>
+  :root{
+    --dark-green:#213B34;
+    --med-green:#006325;
+    --light-green:#A1CEAD;
+    --pale-green:#D9E8E2;
+    --light-gray:#F5F4F0;
+    --blue:#7CC5EB;
+    --black:#000000;
+    --white:#FFFFFF;
+    --fail-red:#B3261E;
+    --warn-amber:#B5720A;
+    --border:#C9D6CF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--light-gray);
+    color:var(--black);
+    line-height:1.4;
+  }
+  header.appbar{
+    background:var(--dark-green);
+    color:var(--white);
+    padding:14px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    position:sticky;
+    top:0;
+    z-index:50;
+    border-bottom:4px solid var(--med-green);
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .brand .mark{
+    font-weight:bold;
+    letter-spacing:0.5px;
+    font-size:20px;
+    background:var(--white);
+    color:var(--dark-green);
+    padding:3px 8px;
+    border-radius:3px;
+  }
+  .brand h1{
+    font-size:16px;
+    margin:0;
+    font-weight:normal;
+    color:var(--pale-green);
+  }
+  nav.tabs{
+    display:flex;
+    gap:6px;
+  }
+  nav.tabs button{
+    background:transparent;
+    border:1px solid var(--light-green);
+    color:var(--white);
+    padding:8px 14px;
+    font-size:13px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  nav.tabs button.active{
+    background:var(--med-green);
+    border-color:var(--med-green);
+  }
+  main{
+    max-width:960px;
+    margin:0 auto;
+    padding:20px 16px 60px;
+  }
+  .card{
+    background:var(--white);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:18px 18px 20px;
+    margin-bottom:18px;
+  }
+  .card h2{
+    font-size:15px;
+    margin:0 0 14px;
+    color:var(--dark-green);
+    border-bottom:2px solid var(--pale-green);
+    padding-bottom:8px;
+  }
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  .grid3{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:14px;
+  }
+  @media (max-width:640px){
+    .grid2, .grid3{grid-template-columns:1fr;}
+  }
+  label{
+    font-size:12.5px;
+    font-weight:bold;
+    color:var(--dark-green);
+    display:block;
+    margin-bottom:4px;
+  }
+  input[type=text], input[type=number], input[type=date], select, textarea{
+    width:100%;
+    padding:8px 9px;
+    border:1px solid #B8C4BE;
+    border-radius:4px;
+    font-family:inherit;
+    font-size:14px;
+    background:var(--white);
+    color:var(--black);
+  }
+  textarea{resize:vertical;min-height:60px;}
+  .field{margin-bottom:12px;}
+  .item-row{
+    border:1px solid var(--border);
+    border-radius:5px;
+    padding:10px 12px;
+    margin-bottom:10px;
+    background:var(--light-gray);
+  }
+  .item-row .item-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .item-name{
+    font-size:14px;
+    font-weight:bold;
+    color:var(--black);
+  }
+  .status-btns{
+    display:flex;
+    gap:6px;
+  }
+  .status-btns button{
+    border:1px solid #B8C4BE;
+    background:var(--white);
+    padding:6px 12px;
+    font-size:12px;
+    border-radius:14px;
+    cursor:pointer;
+    font-family:inherit;
+    color:var(--black);
+  }
+  .status-btns button.sel-ok{background:var(--med-green);border-color:var(--med-green);color:var(--white);}
+  .status-btns button.sel-fail{background:var(--fail-red);border-color:var(--fail-red);color:var(--white);}
+  .status-btns button.sel-na{background:#888;border-color:#888;color:var(--white);}
+  .item-detail{
+    margin-top:8px;
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:10px;
+    align-items:start;
+  }
+  @media (max-width:640px){
+    .item-detail{grid-template-columns:1fr;}
+  }
+  .item-detail textarea{min-height:38px;font-size:13px;}
+  .photo-slot{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .photo-slot img{
+    width:52px;height:52px;object-fit:cover;border-radius:4px;border:1px solid var(--border);
+  }
+  .photo-btn{
+    font-size:12px;
+    padding:6px 10px;
+    background:var(--white);
+    border:1px dashed #9AAAA3;
+    border-radius:4px;
+    cursor:pointer;
+    color:var(--dark-green);
+  }
+  .photo-btn input{display:none;}
+  .remove-photo{
+    font-size:11px;
+    color:var(--fail-red);
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+  }
+  .section-note{
+    font-size:12.5px;
+    color:#4B5A54;
+    margin:-6px 0 14px;
+  }
+  .actions-bar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+  button.primary{
+    background:var(--med-green);
+    color:var(--white);
+    border:none;
+    padding:11px 20px;
+    font-size:14px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:bold;
+  }
+  button.secondary{
+    background:var(--white);
+    color:var(--dark-green);
+    border:1px solid var(--med-green);
+    padding:11px 20px;
+    font-size:14px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  button.ghost{
+    background:none;
+    border:none;
+    color:var(--fail-red);
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:13px;
+    font-family:inherit;
+    padding:6px;
+  }
+  .banner{
+    padding:10px 14px;
+    border-radius:5px;
+    font-size:13px;
+    margin-bottom:16px;
+  }
+  .banner.ok{background:var(--pale-green);color:var(--dark-green);border:1px solid var(--light-green);}
+  .banner.err{background:#F8E4E2;color:var(--fail-red);border:1px solid var(--fail-red);}
+  .hidden{display:none !important;}
+  /* history list */
+  .hist-item{
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    background:var(--white);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .hist-meta{font-size:13px;}
+  .hist-meta strong{color:var(--dark-green);}
+  .hist-flags{font-size:12px;margin-top:4px;}
+  .tag{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:10px;
+    font-size:11px;
+    margin-right:5px;
+    color:var(--white);
+  }
+  .tag.fail{background:var(--fail-red);}
+  .tag.ok{background:var(--med-green);}
+  .hist-btns{display:flex;gap:8px;}
+  .hist-btns button{
+    font-size:12px;
+    padding:7px 12px;
+    border-radius:4px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:#5B6A64;
+    font-size:14px;
+  }
+  #printArea{display:none;}
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(33,59,52,0.55);
+    display:flex;align-items:flex-start;justify-content:center;
+    padding:30px 14px;overflow:auto;z-index:100;
+  }
+  .modal-box{
+    background:var(--white);
+    border-radius:6px;
+    max-width:760px;
+    width:100%;
+    padding:20px;
+  }
+  .modal-box h2{color:var(--dark-green);margin-top:0;}
+  .modal-close{
+    float:right;
+    background:none;border:none;font-size:20px;cursor:pointer;color:var(--dark-green);
+  }
+  .detail-item{
+    border-bottom:1px solid var(--pale-green);
+    padding:8px 0;
+    font-size:13px;
+  }
+  .detail-item img{max-width:120px;border-radius:4px;margin-top:5px;display:block;}
+  footer.app-footer{
+    text-align:center;
+    font-size:11.5px;
+    color:#6C7A75;
+    padding:20px;
+  }
+
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{display:block;position:absolute;top:0;left:0;width:100%;padding:20px;}
+    .no-print{display:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="appbar no-print">
+  <div class="brand">
+    <span class="mark">INSPECT</span>
+    <h1>Daily Equipment Inspection</h1>
+  </div>
+  <nav class="tabs">
+    <button id="tabNewBtn" class="active">New Inspection</button>
+    <button id="tabHistBtn">Inspection History</button>
+  </nav>
+</header>
+
+<main>
+
+  <div id="banner"></div>
+
+  <!-- ============ NEW INSPECTION VIEW ============ -->
+  <section id="viewNew">
+
+    <div class="card">
+      <h2>Equipment &amp; Operator Information</h2>
+      <div class="grid3">
+        <div class="field">
+          <label for="fEquipType">Equipment Type</label>
+          <select id="fEquipType">
+            <option value="">Select equipment&hellip;</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fUnitId">Unit / Asset Number</label>
+          <input type="text" id="fUnitId" placeholder="e.g. MH-104">
+        </div>
+        <div class="field">
+          <label for="fHours">Hour Meter Reading</label>
+          <input type="number" id="fHours" placeholder="e.g. 8421.5" step="0.1" min="0">
+        </div>
+        <div class="field">
+          <label for="fOperator">Operator Name</label>
+          <input type="text" id="fOperator" placeholder="Full name">
+        </div>
+        <div class="field">
+          <label for="fDate">Date</label>
+          <input type="date" id="fDate">
+        </div>
+        <div class="field">
+          <label for="fShift">Shift</label>
+          <select id="fShift">
+            <option value="Day">Day</option>
+            <option value="Night">Night</option>
+            <option value="Weekend">Weekend</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top:4px;">
+        <label for="fAttachment">Attachment in Use</label>
+        <select id="fAttachment">
+          <option value="none">None</option>
+          <option value="grapple">Grapple</option>
+          <option value="magnet">Magnet</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Fluid &amp; Lubrication Checks</h2>
+      <p class="section-note">Mark each fluid OK, Low, or add a note if fluid was added or a leak was found.</p>
+      <div id="fluidItems"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="checklistTitle">General Inspection Checklist</h2>
+      <p class="section-note">Tap OK, Needs Attention, or N/A for each item. Add a comment or photo where useful.</p>
+      <div id="checklistItems"></div>
+    </div>
+
+    <div class="card hidden" id="attachmentCard">
+      <h2 id="attachmentTitle">Attachment Checklist</h2>
+      <p class="section-note">Complete this section only for the attachment currently mounted.</p>
+      <div id="attachmentItems"></div>
+
+      <h3 id="lineChecksTitle" style="font-size:14px; color:var(--dark-green); margin:18px 0 8px; border-top:1px solid var(--pale-green); padding-top:14px;">Line Checks</h3>
+      <p class="section-note">Check each hydraulic, power or control line individually. Rename a line or add more as needed for this unit.</p>
+      <div id="attachmentLines"></div>
+      <button type="button" class="secondary" id="addLineBtn" style="padding:8px 14px; font-size:13px;">+ Add another line</button>
+    </div>
+
+    <div class="card">
+      <h2>General Comments</h2>
+      <div class="field">
+        <label for="fComments">Anything else the next operator or maintenance should know?</label>
+        <textarea id="fComments" placeholder="Notes on performance, sounds, vibrations, near misses, parts needed, etc."></textarea>
+      </div>
+    </div>
+
+    <div class="actions-bar no-print">
+      <button class="ghost" id="clearFormBtn" type="button">Clear form</button>
+      <button class="secondary" id="printCurrentBtn" type="button">Print this inspection</button>
+      <button class="primary" id="saveBtn" type="button">Save Inspection</button>
+    </div>
+  </section>
+
+  <!-- ============ HISTORY VIEW ============ -->
+  <section id="viewHist" class="hidden">
+    <div class="card">
+      <h2>Inspection History</h2>
+      <div class="grid3" style="margin-bottom:6px;">
+        <div class="field">
+          <label for="histFilterEquip">Filter by equipment</label>
+          <select id="histFilterEquip">
+            <option value="">All equipment</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="histFilterUnit">Filter by unit #</label>
+          <input type="text" id="histFilterUnit" placeholder="e.g. MH-104">
+        </div>
+        <div class="field">
+          <label for="histFilterFlag">Show only</label>
+          <select id="histFilterFlag">
+            <option value="">All results</option>
+            <option value="fail">Needs attention items</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="histList"></div>
+  </section>
+
+</main>
+
+<footer class="app-footer no-print">
+  Inspection records are stored in a server-side database, not in this browser — they persist across devices and are shared with everyone using this app.
+</footer>
+
+<!-- Detail modal -->
+<div class="modal-overlay hidden no-print" id="detailModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeModalBtn">&times;</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<!-- Printable area (populated dynamically) -->
+<div id="printArea"></div>
+
+<script>
+(function(){
+
+  /* ---------------------------------------------------------
+     CONFIG: equipment types, checklist items, fluids, attachments
+  --------------------------------------------------------- */
+
+  var COMMON_ITEMS = [
+    "Walk-around visual inspection for new damage",
+    "Tires / tracks condition and pressure",
+    "Lights, signals and beacon",
+    "Horn and backup alarm",
+    "Mirrors and camera visibility",
+    "Seatbelt and operator restraint",
+    "Fire extinguisher present and charged",
+    "Visible fluid, oil or coolant leaks",
+    "Frame and structure condition",
+    "Gauges and warning lights at start-up"
+  ];
+
+  var EQUIPMENT_TYPES = {
+    materialHandler: {
+      label: "Material Handler",
+      items: [
+        "Boom and stick condition",
+        "Cab riser / elevation function",
+        "Counterweight and undercarriage",
+        "Hydraulic hoses and cylinders",
+        "Slew ring / rotation bearing"
+      ]
+    },
+    loader: {
+      label: "Loader",
+      items: [
+        "Bucket / attachment linkage",
+        "Articulation joint",
+        "Bucket cutting edge and teeth",
+        "Hydraulic cylinders"
+      ]
+    },
+    skidSteer: {
+      label: "Skid Steer",
+      items: [
+        "Attachment locking mechanism / quick coupler",
+        "Lift arms and cylinders",
+        "Cab door and restraint bar",
+        "Undercarriage, tires or tracks"
+      ]
+    },
+    forklift: {
+      label: "Forklift",
+      items: [
+        "Forks and carriage condition",
+        "Mast and lift chains",
+        "Load backrest extension",
+        "Overhead guard",
+        "Capacity data plate legible"
+      ]
+    },
+    haulTruck: {
+      label: "Haul Truck",
+      items: [
+        "Braking system (service and parking)",
+        "Dump body and hoist cylinder",
+        "Articulation joint",
+        "Backup camera and alarm system",
+        "Tarp system (if equipped)"
+      ]
+    }
+  };
+
+  var FLUID_ITEMS = [
+    "Engine oil level",
+    "Hydraulic fluid level",
+    "Coolant level",
+    "Fuel level",
+    "DEF level",
+    "Grease / lubrication points"
+  ];
+
+  var ATTACHMENT_CHECKS = {
+    grapple: [
+      "Grapple tips / teeth wear and cracks",
+      "Jaw alignment and full closure",
+      "Hydraulic cylinder leaks (grapple)",
+      "Hydraulic hoses and fittings (grapple)",
+      "Rotation motor / bearing function",
+      "Pins, bushings and retainers",
+      "Structural welds and frame condition"
+    ],
+    magnet: [
+      "Magnet face / plate condition (wear, cracks)",
+      "Lifting cable, chain and shackles",
+      "Power cable insulation and reel",
+      "Generator / power pack function",
+      "Controller, battery and warning lights",
+      "Cooling fan operation (if equipped)",
+      "Mounting yoke / lifting eye condition"
+    ]
+  };
+
+  var ATTACHMENT_LABELS = { grapple: "Grapple", magnet: "Magnet" };
+
+  var DEFAULT_LINES = {
+    grapple: [
+      "Hydraulic line — open function",
+      "Hydraulic line — close function",
+      "Hydraulic line — rotation"
+    ],
+    magnet: [
+      "Main power cable",
+      "Control / signal cable",
+      "Cable reel slip ring connection"
+    ]
+  };
+
+  /* ---------------------------------------------------------
+     STATE
+  --------------------------------------------------------- */
+  // itemState keyed by "group:index" -> {status, notes, photo, label}
+  var itemState = {};
+  // dynamic per-line checks for the currently selected attachment
+  var attachmentLineState = [];
+  var currentAttachmentKey = 'none';
+
+  function resetItemState(){ itemState = {}; }
+
+  function getState(key){
+    if(!itemState[key]) itemState[key] = {status:"", notes:"", photo:null};
+    return itemState[key];
+  }
+
+  function makeLine(label){
+    return { id: 'line_' + Math.random().toString(36).slice(2,9), label: label, status:'', notes:'', photo:null };
+  }
+
+  /* ---------------------------------------------------------
+     INIT: populate equipment dropdown
+  --------------------------------------------------------- */
+  var equipSelect = document.getElementById('fEquipType');
+  var histEquipFilter = document.getElementById('histFilterEquip');
+  Object.keys(EQUIPMENT_TYPES).forEach(function(key){
+    var opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = EQUIPMENT_TYPES[key].label;
+    equipSelect.appendChild(opt);
+
+    var opt2 = opt.cloneNode(true);
+    histEquipFilter.appendChild(opt2);
+  });
+
+  document.getElementById('fDate').valueAsDate = new Date();
+
+  /* ---------------------------------------------------------
+     RENDER: fluid items (static, rendered once)
+  --------------------------------------------------------- */
+  function renderFluidItems(){
+    var container = document.getElementById('fluidItems');
+    container.innerHTML = '';
+    FLUID_ITEMS.forEach(function(label, idx){
+      var key = 'fluid:' + idx;
+      container.appendChild(buildItemRow(key, label, ['OK','Low','Added']));
+    });
+  }
+
+  /* ---------------------------------------------------------
+     RENDER: checklist items (common + equipment-specific)
+  --------------------------------------------------------- */
+  function renderChecklist(equipKey){
+    var container = document.getElementById('checklistItems');
+    var title = document.getElementById('checklistTitle');
+    container.innerHTML = '';
+
+    var allItems = COMMON_ITEMS.slice();
+    if(equipKey && EQUIPMENT_TYPES[equipKey]){
+      allItems = allItems.concat(EQUIPMENT_TYPES[equipKey].items);
+      title.textContent = EQUIPMENT_TYPES[equipKey].label + " Inspection Checklist";
+    } else {
+      title.textContent = "General Inspection Checklist";
+    }
+
+    allItems.forEach(function(label, idx){
+      var key = 'check:' + idx;
+      container.appendChild(buildItemRow(key, label, ['OK','Needs Attention','N/A']));
+    });
+  }
+
+  /* ---------------------------------------------------------
+     RENDER: attachment-specific checklist
+  --------------------------------------------------------- */
+  function renderAttachment(attachKey, resetLines){
+    var card = document.getElementById('attachmentCard');
+    var container = document.getElementById('attachmentItems');
+    var title = document.getElementById('attachmentTitle');
+    var lineTitle = document.getElementById('lineChecksTitle');
+    container.innerHTML = '';
+
+    if(!attachKey || attachKey === 'none' || !ATTACHMENT_CHECKS[attachKey]){
+      card.classList.add('hidden');
+      currentAttachmentKey = 'none';
+      attachmentLineState = [];
+      return;
+    }
+    card.classList.remove('hidden');
+    title.textContent = ATTACHMENT_LABELS[attachKey] + " Attachment Checklist";
+    lineTitle.textContent = ATTACHMENT_LABELS[attachKey] + " Line Checks";
+    ATTACHMENT_CHECKS[attachKey].forEach(function(label, idx){
+      var key = 'attach:' + idx;
+      container.appendChild(buildItemRow(key, label, ['OK','Needs Attention','N/A']));
+    });
+
+    if(resetLines !== false && attachKey !== currentAttachmentKey){
+      attachmentLineState = (DEFAULT_LINES[attachKey] || []).map(makeLine);
+    }
+    currentAttachmentKey = attachKey;
+    renderLineChecks();
+  }
+
+  function renderLineChecks(){
+    var container = document.getElementById('attachmentLines');
+    container.innerHTML = '';
+    attachmentLineState.forEach(function(line){
+      container.appendChild(buildLineRow(line));
+    });
+  }
+
+  function buildLineRow(line){
+    var row = document.createElement('div');
+    row.className = 'item-row';
+
+    var top = document.createElement('div');
+    top.className = 'item-top';
+
+    var labelInput = document.createElement('input');
+    labelInput.type = 'text';
+    labelInput.value = line.label;
+    labelInput.style.fontWeight = 'bold';
+    labelInput.style.flex = '1';
+    labelInput.style.minWidth = '160px';
+    labelInput.addEventListener('input', function(){ line.label = labelInput.value; });
+    top.appendChild(labelInput);
+
+    var btnWrap = document.createElement('div');
+    btnWrap.className = 'status-btns';
+    ['OK','Needs Attention','N/A'].forEach(function(sLabel){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = sLabel;
+      btn.dataset.status = sLabel;
+      applyStatusClass(btn, sLabel, line.status === sLabel);
+      btn.addEventListener('click', function(){
+        line.status = (line.status === sLabel) ? '' : sLabel;
+        Array.prototype.forEach.call(btnWrap.children, function(b){
+          applyStatusClass(b, b.dataset.status, b.dataset.status === line.status);
+        });
+      });
+      btnWrap.appendChild(btn);
+    });
+    top.appendChild(btnWrap);
+
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'ghost';
+    removeBtn.textContent = 'Remove';
+    removeBtn.style.padding = '0 4px';
+    removeBtn.addEventListener('click', function(){
+      attachmentLineState = attachmentLineState.filter(function(l){ return l.id !== line.id; });
+      renderLineChecks();
+    });
+    top.appendChild(removeBtn);
+
+    row.appendChild(top);
+
+    var detail = document.createElement('div');
+    detail.className = 'item-detail';
+
+    var notesField = document.createElement('textarea');
+    notesField.placeholder = 'Comment (optional)';
+    notesField.value = line.notes || '';
+    notesField.addEventListener('input', function(){ line.notes = notesField.value; });
+    detail.appendChild(notesField);
+
+    var photoWrap = document.createElement('div');
+    photoWrap.className = 'photo-slot';
+    renderPhotoSlot(photoWrap, line.id, line);
+    detail.appendChild(photoWrap);
+
+    row.appendChild(detail);
+    return row;
+  }
+
+  /* ---------------------------------------------------------
+     Build a single item row (status buttons + notes + photo)
+  --------------------------------------------------------- */
+  function buildItemRow(key, label, statusLabels){
+    var state = getState(key);
+    state.label = label;
+
+    var row = document.createElement('div');
+    row.className = 'item-row';
+    row.dataset.key = key;
+
+    var top = document.createElement('div');
+    top.className = 'item-top';
+
+    var name = document.createElement('div');
+    name.className = 'item-name';
+    name.textContent = label;
+    top.appendChild(name);
+
+    var btnWrap = document.createElement('div');
+    btnWrap.className = 'status-btns';
+    statusLabels.forEach(function(sLabel){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = sLabel;
+      btn.dataset.status = sLabel;
+      applyStatusClass(btn, sLabel, state.status === sLabel);
+      btn.addEventListener('click', function(){
+        state.status = (state.status === sLabel) ? '' : sLabel;
+        Array.prototype.forEach.call(btnWrap.children, function(b){
+          applyStatusClass(b, b.dataset.status, b.dataset.status === state.status);
+        });
+      });
+      btnWrap.appendChild(btn);
+    });
+    top.appendChild(btnWrap);
+    row.appendChild(top);
+
+    var detail = document.createElement('div');
+    detail.className = 'item-detail';
+
+    var notesField = document.createElement('textarea');
+    notesField.placeholder = 'Comment (optional)';
+    notesField.value = state.notes || '';
+    notesField.addEventListener('input', function(){ state.notes = notesField.value; });
+    detail.appendChild(notesField);
+
+    var photoWrap = document.createElement('div');
+    photoWrap.className = 'photo-slot';
+    renderPhotoSlot(photoWrap, key, state);
+    detail.appendChild(photoWrap);
+
+    row.appendChild(detail);
+    return row;
+  }
+
+  function applyStatusClass(btn, statusLabel, isSelected){
+    btn.classList.remove('sel-ok','sel-fail','sel-na');
+    if(!isSelected) return;
+    if(statusLabel === 'OK' || statusLabel === 'Added') btn.classList.add('sel-ok');
+    else if(statusLabel === 'Needs Attention' || statusLabel === 'Low') btn.classList.add('sel-fail');
+    else btn.classList.add('sel-na');
+  }
+
+  function renderPhotoSlot(container, key, state){
+    container.innerHTML = '';
+    if(state.photo){
+      var img = document.createElement('img');
+      img.src = state.photo;
+      container.appendChild(img);
+      var rm = document.createElement('button');
+      rm.className = 'remove-photo';
+      rm.type = 'button';
+      rm.textContent = 'Remove';
+      rm.addEventListener('click', function(){
+        state.photo = null;
+        renderPhotoSlot(container, key, state);
+      });
+      container.appendChild(rm);
+    } else {
+      var label = document.createElement('label');
+      label.className = 'photo-btn';
+      label.textContent = 'Add photo';
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.capture = 'environment';
+      input.addEventListener('change', function(e){
+        var file = e.target.files[0];
+        if(!file) return;
+        compressImage(file, function(dataUrl){
+          state.photo = dataUrl;
+          renderPhotoSlot(container, key, state);
+        });
+      });
+      label.appendChild(input);
+      container.appendChild(label);
+    }
+  }
+
+  function compressImage(file, callback){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var maxW = 480;
+        var scale = Math.min(1, maxW / img.width);
+        var canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        callback(canvas.toDataURL('image/jpeg', 0.55));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  /* ---------------------------------------------------------
+     Equipment / attachment change handlers
+  --------------------------------------------------------- */
+  equipSelect.addEventListener('change', function(){
+    renderChecklist(equipSelect.value);
+  });
+  document.getElementById('fAttachment').addEventListener('change', function(e){
+    renderAttachment(e.target.value, true);
+  });
+
+  document.getElementById('addLineBtn').addEventListener('click', function(){
+    attachmentLineState.push(makeLine('New line'));
+    renderLineChecks();
+  });
+
+  renderFluidItems();
+  renderChecklist('');
+  renderAttachment('none');
+
+  /* ---------------------------------------------------------
+     Banner helper
+  --------------------------------------------------------- */
+  function showBanner(msg, type){
+    var b = document.getElementById('banner');
+    b.className = 'banner ' + (type || 'ok');
+    b.textContent = msg;
+    b.classList.remove('hidden');
+    setTimeout(function(){ b.classList.add('hidden'); }, 4500);
+  }
+
+  /* ---------------------------------------------------------
+     Collect current form into a record object
+  --------------------------------------------------------- */
+  function collectRecord(){
+    var equipKey = equipSelect.value;
+    var attachKey = document.getElementById('fAttachment').value;
+
+    function collectGroup(prefix, sourceLabels){
+      var out = [];
+      sourceLabels.forEach(function(label, idx){
+        var key = prefix + ':' + idx;
+        var st = itemState[key] || {};
+        out.push({
+          label: label,
+          status: st.status || '',
+          notes: st.notes || '',
+          photo: st.photo || null
+        });
+      });
+      return out;
+    }
+
+    var checklistLabels = COMMON_ITEMS.slice();
+    if(equipKey && EQUIPMENT_TYPES[equipKey]) checklistLabels = checklistLabels.concat(EQUIPMENT_TYPES[equipKey].items);
+
+    var record = {
+      id: 'insp_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+      equipmentType: equipKey,
+      equipmentLabel: equipKey ? EQUIPMENT_TYPES[equipKey].label : '',
+      unitId: document.getElementById('fUnitId').value.trim(),
+      hours: document.getElementById('fHours').value,
+      operator: document.getElementById('fOperator').value.trim(),
+      date: document.getElementById('fDate').value,
+      shift: document.getElementById('fShift').value,
+      attachment: attachKey,
+      fluids: collectGroup('fluid', FLUID_ITEMS),
+      checklist: collectGroup('check', checklistLabels),
+      attachmentChecklist: (attachKey !== 'none' && ATTACHMENT_CHECKS[attachKey]) ? collectGroup('attach', ATTACHMENT_CHECKS[attachKey]) : [],
+      attachmentLines: (attachKey !== 'none') ? attachmentLineState.map(function(l){
+        return { label: l.label, status: l.status, notes: l.notes, photo: l.photo };
+      }) : [],
+      comments: document.getElementById('fComments').value.trim(),
+      savedAt: new Date().toISOString()
+    };
+    return record;
+  }
+
+  function validateRecord(r){
+    if(!r.equipmentType) return 'Please select an equipment type.';
+    if(!r.unitId) return 'Please enter the unit / asset number.';
+    if(!r.operator) return 'Please enter the operator name.';
+    if(!r.date) return 'Please select a date.';
+    return null;
+  }
+
+  function hasAnyFail(r){
+    var groups = [r.fluids, r.checklist, r.attachmentChecklist, r.attachmentLines];
+    for(var g=0; g<groups.length; g++){
+      for(var i=0; i<groups[g].length; i++){
+        var s = groups[g][i].status;
+        if(s === 'Needs Attention' || s === 'Low') return true;
+      }
+    }
+    return false;
+  }
+
+  /* ---------------------------------------------------------
+     Save to persistent storage
+  --------------------------------------------------------- */
+  function saveInspection(){
+    var record = collectRecord();
+    var err = validateRecord(record);
+    if(err){ showBanner(err, 'err'); return; }
+
+    fetch('/api/inspections', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record)
+    })
+      .then(function(res){
+        if(!res.ok) return res.json().then(function(body){ throw new Error(body.error || 'Save failed'); });
+        return res.json();
+      })
+      .then(function(){
+        showBanner('Inspection saved' + (hasAnyFail(record) ? ' — flagged items need attention.' : '.'), hasAnyFail(record) ? 'err' : 'ok');
+        clearForm(false);
+      })
+      .catch(function(e){
+        console.error('Save error', e);
+        showBanner('Could not save inspection. Please try again.', 'err');
+      });
+  }
+
+  function clearForm(confirmFirst){
+    if(confirmFirst && !window.confirm('Clear all fields on this form?')) return;
+    resetItemState();
+    document.getElementById('fUnitId').value = '';
+    document.getElementById('fHours').value = '';
+    document.getElementById('fOperator').value = '';
+    document.getElementById('fDate').valueAsDate = new Date();
+    document.getElementById('fShift').value = 'Day';
+    document.getElementById('fComments').value = '';
+    equipSelect.value = '';
+    document.getElementById('fAttachment').value = 'none';
+    attachmentLineState = [];
+    currentAttachmentKey = 'none';
+    renderFluidItems();
+    renderChecklist('');
+    renderAttachment('none');
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', saveInspection);
+  document.getElementById('clearFormBtn').addEventListener('click', function(){ clearForm(true); });
+
+  /* ---------------------------------------------------------
+     Printing
+  --------------------------------------------------------- */
+  function statusTagHtml(status){
+    if(!status) return '<span style="color:#888;">Not checked</span>';
+    var cls = (status === 'Needs Attention' || status === 'Low') ? 'fail' : 'ok';
+    return '<span class="tag ' + cls + '">' + escapeHtml(status) + '</span>';
+  }
+
+  function escapeHtml(str){
+    return String(str || '').replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function buildPrintHtml(record){
+    var html = '';
+    html += '<div style="font-family:Arial, sans-serif; color:#000;">';
+    html += '<div style="border-bottom:3px solid #213B34; padding-bottom:10px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">';
+    html += '<div style="font-size:20px; font-weight:bold; color:#213B34;">Daily Equipment Inspection</div>';
+    html += '<div style="font-size:12px;">Printed ' + escapeHtml(new Date().toLocaleString()) + '</div>';
+    html += '</div>';
+
+    html += '<table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px;">';
+    html += printRow('Equipment Type', record.equipmentLabel || record.equipmentType) + printRow('Unit / Asset #', record.unitId);
+    html += printRow('Operator', record.operator) + printRow('Date', record.date);
+    html += printRow('Shift', record.shift) + printRow('Hour Meter', record.hours);
+    html += printRow('Attachment', record.attachment && record.attachment !== 'none' ? (ATTACHMENT_LABELS[record.attachment] || record.attachment) : 'None');
+    html += '</table>';
+
+    html += printSection('Fluid &amp; Lubrication Checks', record.fluids);
+    html += printSection('Inspection Checklist', record.checklist);
+    if(record.attachmentChecklist && record.attachmentChecklist.length){
+      html += printSection((ATTACHMENT_LABELS[record.attachment] || 'Attachment') + ' Checklist', record.attachmentChecklist);
+    }
+    if(record.attachmentLines && record.attachmentLines.length){
+      html += printSection((ATTACHMENT_LABELS[record.attachment] || 'Attachment') + ' Line Checks', record.attachmentLines);
+    }
+
+    html += '<h3 style="color:#213B34; border-bottom:1px solid #A1CEAD; padding-bottom:4px;">General Comments</h3>';
+    html += '<p style="font-size:13px; white-space:pre-wrap;">' + (escapeHtml(record.comments) || '<em>None</em>') + '</p>';
+
+    html += '<div style="margin-top:40px; display:flex; gap:60px;">';
+    html += '<div style="flex:1; border-top:1px solid #000; padding-top:4px; font-size:12px;">Operator Signature</div>';
+    html += '<div style="flex:1; border-top:1px solid #000; padding-top:4px; font-size:12px;">Supervisor Signature</div>';
+    html += '</div>';
+
+    html += '</div>';
+    return html;
+  }
+
+  function printRow(label, value){
+    return '<tr><td style="padding:5px 8px; font-weight:bold; background:#F5F4F0; width:35%; border:1px solid #D9E8E2;">' + escapeHtml(label) + '</td>' +
+      '<td style="padding:5px 8px; border:1px solid #D9E8E2;">' + escapeHtml(value || '&mdash;') + '</td></tr>';
+  }
+
+  function printSection(title, items){
+    var html = '<h3 style="color:#213B34; border-bottom:1px solid #A1CEAD; padding-bottom:4px; margin-top:20px;">' + title + '</h3>';
+    html += '<table style="width:100%; border-collapse:collapse; font-size:12.5px;">';
+    items.forEach(function(it){
+      html += '<tr>';
+      html += '<td style="padding:5px 8px; border:1px solid #D9E8E2; width:38%;">' + escapeHtml(it.label) + '</td>';
+      html += '<td style="padding:5px 8px; border:1px solid #D9E8E2; width:15%;">' + statusTagHtml(it.status) + '</td>';
+      html += '<td style="padding:5px 8px; border:1px solid #D9E8E2;">' + (escapeHtml(it.notes) || '&nbsp;') +
+        (it.photo ? '<br><img src="' + it.photo + '" style="max-width:90px; margin-top:4px; border-radius:3px;">' : '') + '</td>';
+      html += '</tr>';
+    });
+    html += '</table>';
+    return html;
+  }
+
+  function printRecord(record){
+    document.getElementById('printArea').innerHTML = buildPrintHtml(record);
+    window.print();
+  }
+
+  document.getElementById('printCurrentBtn').addEventListener('click', function(){
+    var record = collectRecord();
+    printRecord(record);
+  });
+
+  /* ---------------------------------------------------------
+     Tabs
+  --------------------------------------------------------- */
+  var tabNewBtn = document.getElementById('tabNewBtn');
+  var tabHistBtn = document.getElementById('tabHistBtn');
+  var viewNew = document.getElementById('viewNew');
+  var viewHist = document.getElementById('viewHist');
+
+  tabNewBtn.addEventListener('click', function(){
+    tabNewBtn.classList.add('active');
+    tabHistBtn.classList.remove('active');
+    viewNew.classList.remove('hidden');
+    viewHist.classList.add('hidden');
+  });
+  tabHistBtn.addEventListener('click', function(){
+    tabHistBtn.classList.add('active');
+    tabNewBtn.classList.remove('active');
+    viewHist.classList.remove('hidden');
+    viewNew.classList.add('hidden');
+    loadHistory();
+  });
+
+  /* ---------------------------------------------------------
+     History list
+  --------------------------------------------------------- */
+  var historyIndexCache = [];
+
+  function loadHistory(){
+    var list = document.getElementById('histList');
+    list.innerHTML = '<div class="empty-state">Loading inspection history&hellip;</div>';
+    fetch('/api/inspections')
+      .then(function(res){
+        if(!res.ok) throw new Error('Failed to load history');
+        return res.json();
+      })
+      .then(function(rows){
+        historyIndexCache = rows.map(function(r){
+          return {
+            id: r.id,
+            equipmentType: r.equipment_type,
+            equipmentLabel: r.equipment_label,
+            unitId: r.unit_id,
+            operator: r.operator,
+            date: r.inspection_date,
+            shift: r.shift,
+            hours: r.hours,
+            attachment: r.attachment,
+            hasFail: r.has_fail,
+            savedAt: r.saved_at
+          };
+        });
+        renderHistoryList();
+      })
+      .catch(function(e){
+        console.error('History load error', e);
+        historyIndexCache = [];
+        list.innerHTML = '<div class="empty-state">Could not load inspection history. Please try again.</div>';
+      });
+  }
+
+  function renderHistoryList(){
+    var list = document.getElementById('histList');
+    var equipFilter = document.getElementById('histFilterEquip').value;
+    var unitFilter = document.getElementById('histFilterUnit').value.trim().toLowerCase();
+    var flagFilter = document.getElementById('histFilterFlag').value;
+
+    var filtered = historyIndexCache.filter(function(r){
+      if(equipFilter && r.equipmentType !== equipFilter) return false;
+      if(unitFilter && (r.unitId || '').toLowerCase().indexOf(unitFilter) === -1) return false;
+      if(flagFilter === 'fail' && !r.hasFail) return false;
+      return true;
+    });
+
+    list.innerHTML = '';
+    if(!filtered.length){
+      list.innerHTML = '<div class="empty-state">No inspections found yet. Saved inspections will appear here.</div>';
+      return;
+    }
+
+    filtered.forEach(function(r){
+      var row = document.createElement('div');
+      row.className = 'hist-item';
+
+      var meta = document.createElement('div');
+      meta.className = 'hist-meta';
+      meta.innerHTML = '<strong>' + escapeHtml(r.equipmentLabel) + ' &mdash; ' + escapeHtml(r.unitId) + '</strong><br>' +
+        escapeHtml(r.date) + ' &middot; ' + escapeHtml(r.shift) + ' shift &middot; ' + escapeHtml(r.operator) +
+        '<div class="hist-flags">' + (r.hasFail ? '<span class="tag fail">Needs attention</span>' : '<span class="tag ok">All clear</span>') +
+        (r.attachment && r.attachment !== 'none' ? '<span class="tag ok" style="background:#7CC5EB; color:#213B34;">' + escapeHtml(ATTACHMENT_LABELS[r.attachment] || r.attachment) + '</span>' : '') +
+        '</div>';
+      row.appendChild(meta);
+
+      var btns = document.createElement('div');
+      btns.className = 'hist-btns';
+
+      var viewBtn = document.createElement('button');
+      viewBtn.textContent = 'View';
+      viewBtn.style.background = '#fff';
+      viewBtn.style.border = '1px solid #006325';
+      viewBtn.style.color = '#213B34';
+      viewBtn.addEventListener('click', function(){ openDetail(r.id); });
+      btns.appendChild(viewBtn);
+
+      var printBtn = document.createElement('button');
+      printBtn.textContent = 'Print';
+      printBtn.style.background = '#006325';
+      printBtn.style.border = 'none';
+      printBtn.style.color = '#fff';
+      printBtn.addEventListener('click', function(){
+        fetch('/api/inspection?id=' + encodeURIComponent(r.id))
+          .then(function(res){ if(!res.ok) throw new Error('not found'); return res.json(); })
+          .then(function(record){ printRecord(record); })
+          .catch(function(e){ console.error('Print load error', e); showBanner('Could not load that inspection.', 'err'); });
+      });
+      btns.appendChild(printBtn);
+
+      row.appendChild(btns);
+      list.appendChild(row);
+    });
+  }
+
+  document.getElementById('histFilterEquip').addEventListener('change', renderHistoryList);
+  document.getElementById('histFilterUnit').addEventListener('input', renderHistoryList);
+  document.getElementById('histFilterFlag').addEventListener('change', renderHistoryList);
+
+  function openDetail(id){
+    fetch('/api/inspection?id=' + encodeURIComponent(id))
+      .then(function(res){ if(!res.ok) throw new Error('not found'); return res.json(); })
+      .then(function(record){
+      var content = document.getElementById('detailContent');
+      var html = '<h2>' + escapeHtml(record.equipmentLabel) + ' &mdash; ' + escapeHtml(record.unitId) + '</h2>';
+      html += '<p style="font-size:13px; color:#4B5A54;">' + escapeHtml(record.date) + ' &middot; ' + escapeHtml(record.shift) + ' shift &middot; Operator: ' + escapeHtml(record.operator) + ' &middot; Hours: ' + escapeHtml(record.hours || '—') + '</p>';
+
+      function renderDetailGroup(title, items){
+        var h = '<h3 style="color:#213B34;">' + title + '</h3>';
+        items.forEach(function(it){
+          h += '<div class="detail-item"><strong>' + escapeHtml(it.label) + '</strong> — ' + (it.status || 'Not checked');
+          if(it.notes) h += '<div>' + escapeHtml(it.notes) + '</div>';
+          if(it.photo) h += '<img src="' + it.photo + '">';
+          h += '</div>';
+        });
+        return h;
+      }
+
+      html += renderDetailGroup('Fluid Checks', record.fluids);
+      html += renderDetailGroup('Inspection Checklist', record.checklist);
+      if(record.attachmentChecklist && record.attachmentChecklist.length){
+        html += renderDetailGroup((ATTACHMENT_LABELS[record.attachment] || 'Attachment') + ' Checklist', record.attachmentChecklist);
+      }
+      if(record.attachmentLines && record.attachmentLines.length){
+        html += renderDetailGroup((ATTACHMENT_LABELS[record.attachment] || 'Attachment') + ' Line Checks', record.attachmentLines);
+      }
+      html += '<h3 style="color:#213B34;">Comments</h3><p>' + (escapeHtml(record.comments) || '<em>None</em>') + '</p>';
+
+      content.innerHTML = html;
+      document.getElementById('detailModal').classList.remove('hidden');
+    })
+    .catch(function(e){
+      console.error('Detail load error', e);
+      showBanner('Could not load that inspection.', 'err');
+    });
+  }
+
+  document.getElementById('closeModalBtn').addEventListener('click', function(){
+    document.getElementById('detailModal').classList.add('hidden');
+  });
+  document.getElementById('detailModal').addEventListener('click', function(e){
+    if(e.target === document.getElementById('detailModal')) e.currentTarget.classList.add('hidden');
+  });
+
+})();
+</script>
+</body>
+</html>
