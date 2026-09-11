@@ -1,5 +1,6 @@
 import { sql, ensureTable, computeHasFail } from '../lib/db.js';
 import { requireAuth, requireAdmin } from '../lib/auth.js';
+import { sendFailureAlert } from '../lib/email.js';
 
 const REQUIRED_FIELDS = ['equipmentType', 'unitId', 'operator', 'date'];
 
@@ -82,6 +83,23 @@ export default async function handler(req, res) {
       `;
 
       res.status(200).json({ ok: true, id, hasFail, savedAt });
+
+      // Fire the "needs attention" alert after responding to the client —
+      // a slow or failed email should never hold up or break the save.
+      if (hasFail) {
+        try {
+          const notifyResult = await sql`SELECT value FROM app_config WHERE key = ${'notify_emails'} LIMIT 1;`;
+          const toEmails = notifyResult.rows.length ? notifyResult.rows[0].value.emails : [];
+          if (toEmails.length) {
+            const proto = req.headers['x-forwarded-proto'] || 'https';
+            const host = req.headers.host;
+            const appUrl = host ? `${proto}://${host}` : null;
+            await sendFailureAlert({ toEmails, record: fullRecord, appUrl });
+          }
+        } catch (emailErr) {
+          console.error('Failed to send inspection alert email', emailErr);
+        }
+      }
       return;
     }
 

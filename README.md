@@ -20,8 +20,10 @@ The very first account created (via the one-time setup screen the app shows when
   - `GET/POST /api/auth` — setup, login, logout, change password
   - `GET/POST/DELETE /api/users` — admin-only user management
   - `GET/PUT/DELETE /api/config` — checklist configuration (any signed-in user can read it, only admins can change it)
+  - `GET/PUT /api/notify` — admin-only management of who gets emailed on flagged inspections
   - `GET/POST/DELETE /api/inspections` — list, create (any signed-in user), delete (admin only); posting with an existing inspection's id is treated as an edit and is admin-only
   - `GET /api/inspection` — fetch one full inspection record (`?id=...`)
+- **Email alerts:** via [Resend](https://resend.com) (`lib/email.js`). Fires after an inspection with a flagged item is saved, to whichever addresses are configured in the app's Users tab. No-ops safely if `RESEND_API_KEY` isn't set.
 - **Database:** Postgres via the standard `pg` driver (works with Neon, Supabase, or any Postgres — see setup below). Tables are created automatically the first time the app runs.
 - **Auth:** bcrypt-hashed passwords, JWT session tokens in an httpOnly cookie.
 
@@ -41,11 +43,27 @@ JWT_SECRET = <any long random string>
 
 This signs login session tokens. You can generate one with `openssl rand -base64 32` in a terminal, or just mash the keyboard for 40+ characters — it just needs to be secret and stay the same across deploys.
 
-### 3. Redeploy
+### 3. (Optional) Turn on email alerts
+
+The app can email a list of people whenever an inspection is saved with an item marked **Needs Attention** or **Low**. This uses [Resend](https://resend.com) — sign up (free tier is plenty for this), create an API key, then add it in **Settings → Environment Variables**:
+
+```
+RESEND_API_KEY = <your Resend API key>
+```
+
+Optionally also set:
+
+```
+ALERT_FROM_EMAIL = "Equipment Inspections <alerts@yourdomain.com>"
+```
+
+If you skip this, `onboarding@resend.dev` is used as the sender — fine for testing, but Resend restricts who that address can send to, so a verified sending domain is worth setting up for real use. Once `RESEND_API_KEY` is set, sign in as an admin and add recipient addresses under **Users → Email alerts** — nothing else needs to change in code. If `RESEND_API_KEY` isn't set, the app still works completely normally; it just skips sending (and tells admins so on the Email alerts panel).
+
+### 4. Redeploy
 
 Redeploy (or push a commit) so the function picks up the new environment variables.
 
-### 4. Create the first admin account
+### 5. Create the first admin account
 
 Visit the deployed app. Since no users exist yet, it will show a "Create the first admin account" screen instead of a login form. Whatever account you create here is an admin, and can add more users (admin or general) from the **Users** tab afterward.
 

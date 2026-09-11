@@ -602,6 +602,21 @@
       <h2>Existing users</h2>
       <div id="usersList"></div>
     </div>
+    <div class="card">
+      <h2>Email alerts</h2>
+      <p class="section-note">Everyone on this list gets an email whenever an inspection is saved with an item marked <strong>Needs Attention</strong> or <strong>Low</strong>.</p>
+      <div id="notifyBanner"></div>
+      <div class="grid2">
+        <div class="field">
+          <label for="newNotifyEmail">Add an email address</label>
+          <input type="text" id="newNotifyEmail" placeholder="name@example.com" autocomplete="off">
+        </div>
+      </div>
+      <div class="actions-bar" style="justify-content:flex-start; margin-bottom:14px;">
+        <button class="secondary" id="addNotifyEmailBtn" type="button">Add</button>
+      </div>
+      <div id="notifyList"></div>
+    </div>
   </section>
 
   <!-- ============ CHECKLIST CONFIG VIEW (admin only) ============ -->
@@ -845,6 +860,7 @@
     wireHistory();
     wireSaveAndPrint();
     wireUsersAdmin();
+    wireNotifyAdmin();
     wireConfigAdmin();
   }
 
@@ -1371,7 +1387,7 @@
           document.getElementById(tabs[otherBtnId]).classList.toggle('hidden', otherBtnId !== btnId);
         });
         if(btnId === 'tabHistBtn') loadHistory();
-        if(btnId === 'tabUsersBtn') loadUsers();
+        if(btnId === 'tabUsersBtn'){ loadUsers(); loadNotifyEmails(); }
         if(btnId === 'tabConfigBtn') loadConfigEditor();
       });
     });
@@ -1607,6 +1623,73 @@
       .catch(function(e){
         if(handleAuthLoss(e)) return;
         list.innerHTML = '<div class="empty-state">Could not load users.</div>';
+      });
+  }
+
+  /* ---------------------------------------------------------
+     Email alerts admin
+  --------------------------------------------------------- */
+  function wireNotifyAdmin(){
+    document.getElementById('addNotifyEmailBtn').addEventListener('click', function(){
+      clearBannerIn('notifyBanner');
+      var input = document.getElementById('newNotifyEmail');
+      var email = input.value.trim();
+      if(!email || email.indexOf('@') === -1){ showBannerIn('notifyBanner', 'Enter a valid email address.', 'err'); return; }
+
+      api('/api/notify')
+        .then(function(current){
+          var emails = current.emails || [];
+          if(emails.indexOf(email) !== -1){ showBannerIn('notifyBanner', 'That address is already on the list.', 'err'); return null; }
+          emails.push(email);
+          return api('/api/notify', { method: 'PUT', body: JSON.stringify({ emails: emails }) });
+        })
+        .then(function(result){
+          if(!result) return;
+          input.value = '';
+          showBannerIn('notifyBanner', 'Added.', 'ok');
+          loadNotifyEmails();
+        })
+        .catch(function(e){
+          if(handleAuthLoss(e)) return;
+          showBannerIn('notifyBanner', e.message || 'Could not add that address.', 'err');
+        });
+    });
+  }
+
+  function loadNotifyEmails(){
+    var list = document.getElementById('notifyList');
+    list.innerHTML = '<div class="empty-state">Loading&hellip;</div>';
+    api('/api/notify')
+      .then(function(res){
+        clearBannerIn('notifyBanner');
+        if(!res.emailConfigured){
+          showBannerIn('notifyBanner', 'Heads up: no email service is configured on the server yet (RESEND_API_KEY), so alerts won\u2019t actually send until that\u2019s set up \u2014 but you can still manage the recipient list now.', 'err');
+        }
+        var emails = res.emails || [];
+        list.innerHTML = '';
+        if(!emails.length){ list.innerHTML = '<div class="empty-state">No alert recipients yet.</div>'; return; }
+        emails.forEach(function(email){
+          var row = document.createElement('div');
+          row.className = 'user-row';
+          var info = document.createElement('div');
+          info.textContent = email;
+          row.appendChild(info);
+          var delBtn = document.createElement('button');
+          delBtn.className = 'danger';
+          delBtn.textContent = 'Remove';
+          delBtn.addEventListener('click', function(){
+            var updated = emails.filter(function(e){ return e !== email; });
+            api('/api/notify', { method: 'PUT', body: JSON.stringify({ emails: updated }) })
+              .then(function(){ loadNotifyEmails(); })
+              .catch(function(e){ if(handleAuthLoss(e)) return; showBannerIn('notifyBanner', e.message || 'Could not remove that address.', 'err'); });
+          });
+          row.appendChild(delBtn);
+          list.appendChild(row);
+        });
+      })
+      .catch(function(e){
+        if(handleAuthLoss(e)) return;
+        list.innerHTML = '<div class="empty-state">Could not load alert recipients.</div>';
       });
   }
 
