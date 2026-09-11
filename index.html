@@ -445,6 +445,7 @@
   <nav class="tabs">
     <button id="tabNewBtn" class="active">New Inspection</button>
     <button id="tabHistBtn">Inspection History</button>
+    <button id="tabReportsBtn">Reports</button>
     <button id="tabUsersBtn" class="hidden">Users</button>
     <button id="tabConfigBtn" class="hidden">Checklist Setup</button>
   </nav>
@@ -477,6 +478,12 @@
         <div class="field">
           <label for="fUnitId">Unit / Asset Number</label>
           <input type="text" id="fUnitId" placeholder="e.g. MH-104">
+        </div>
+        <div class="field">
+          <label for="fLocation">Location</label>
+          <select id="fLocation">
+            <option value="">Select location&hellip;</option>
+          </select>
         </div>
         <div class="field">
           <label for="fHours">Hour Meter Reading</label>
@@ -561,6 +568,12 @@
           <input type="text" id="histFilterUnit" placeholder="e.g. MH-104">
         </div>
         <div class="field">
+          <label for="histFilterLocation">Filter by location</label>
+          <select id="histFilterLocation">
+            <option value="">All locations</option>
+          </select>
+        </div>
+        <div class="field">
           <label for="histFilterFlag">Show only</label>
           <select id="histFilterFlag">
             <option value="">All results</option>
@@ -570,6 +583,87 @@
       </div>
     </div>
     <div id="histList"></div>
+  </section>
+
+  <!-- ============ REPORTS VIEW ============ -->
+  <section id="viewReports" class="hidden">
+    <div class="card">
+      <h2>Report filters</h2>
+      <div class="grid3">
+        <div class="field">
+          <label for="repFilterLocation">Location</label>
+          <select id="repFilterLocation">
+            <option value="">All locations</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="repFilterEquip">Equipment type</label>
+          <select id="repFilterEquip">
+            <option value="">All equipment</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="repFilterUnit">Asset / unit #</label>
+          <input type="text" id="repFilterUnit" placeholder="e.g. MH-104">
+        </div>
+        <div class="field">
+          <label for="repFilterOperator">Operator</label>
+          <input type="text" id="repFilterOperator" placeholder="e.g. Bill">
+        </div>
+        <div class="field">
+          <label for="repFilterShift">Shift</label>
+          <select id="repFilterShift">
+            <option value="">All shifts</option>
+            <option value="Day">Day</option>
+            <option value="Night">Night</option>
+            <option value="Weekend">Weekend</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="repFilterFlag">Show only</label>
+          <select id="repFilterFlag">
+            <option value="">All results</option>
+            <option value="fail">Needs attention items</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="repFilterFrom">Date from</label>
+          <input type="date" id="repFilterFrom">
+        </div>
+        <div class="field">
+          <label for="repFilterTo">Date to</label>
+          <input type="date" id="repFilterTo">
+        </div>
+      </div>
+      <div class="actions-bar" style="justify-content:flex-start;">
+        <button class="ghost" id="repClearFiltersBtn" type="button">Clear filters</button>
+        <button class="secondary" id="repExportBtn" type="button">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Summary</h2>
+      <div id="repSummary"></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2>By Location</h2>
+        <div id="repByLocation"></div>
+      </div>
+      <div class="card">
+        <h2>By Equipment Type</h2>
+        <div id="repByEquip"></div>
+      </div>
+      <div class="card">
+        <h2>By Operator</h2>
+        <div id="repByOperator"></div>
+      </div>
+      <div class="card">
+        <h2>By Shift</h2>
+        <div id="repByShift"></div>
+      </div>
+    </div>
   </section>
 
   <!-- ============ USERS VIEW (admin only) ============ -->
@@ -812,23 +906,48 @@
   /* ---------------------------------------------------------
      INIT FORM (once config is loaded)
   --------------------------------------------------------- */
-  var equipSelect, histEquipFilter;
+  var equipSelect, histEquipFilter, repEquipFilter, locationSelects;
+
+  function populateLocationSelects(){
+    var selects = [
+      document.getElementById('fLocation'),
+      document.getElementById('histFilterLocation'),
+      document.getElementById('repFilterLocation')
+    ];
+    var locations = APP_CONFIG.locations || [];
+    selects.forEach(function(sel){
+      var isFilter = sel.id !== 'fLocation';
+      var current = sel.value;
+      sel.innerHTML = isFilter ? '<option value="">All locations</option>' : '<option value="">Select location&hellip;</option>';
+      locations.forEach(function(loc){
+        var opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = loc;
+        sel.appendChild(opt);
+      });
+      if(current) sel.value = current;
+    });
+  }
 
   function initFormFromConfig(){
     equipSelect = document.getElementById('fEquipType');
     histEquipFilter = document.getElementById('histFilterEquip');
+    repEquipFilter = document.getElementById('repFilterEquip');
 
     equipSelect.innerHTML = '<option value="">Select equipment&hellip;</option>';
     histEquipFilter.innerHTML = '<option value="">All equipment</option>';
+    repEquipFilter.innerHTML = '<option value="">All equipment</option>';
     Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
       var opt = document.createElement('option');
       opt.value = key;
       opt.textContent = APP_CONFIG.equipmentTypes[key].label;
       equipSelect.appendChild(opt);
 
-      var opt2 = opt.cloneNode(true);
-      histEquipFilter.appendChild(opt2);
+      histEquipFilter.appendChild(opt.cloneNode(true));
+      repEquipFilter.appendChild(opt.cloneNode(true));
     });
+
+    populateLocationSelects();
 
     var attachSelect = document.getElementById('fAttachment');
     attachSelect.innerHTML = '<option value="none">None</option>';
@@ -858,6 +977,7 @@
 
     wireTabs();
     wireHistory();
+    wireReports();
     wireSaveAndPrint();
     wireUsersAdmin();
     wireNotifyAdmin();
@@ -1162,6 +1282,7 @@
       equipmentType: equipKey,
       equipmentLabel: equipKey ? APP_CONFIG.equipmentTypes[equipKey].label : '',
       unitId: document.getElementById('fUnitId').value.trim(),
+      location: document.getElementById('fLocation').value,
       hours: document.getElementById('fHours').value,
       operator: document.getElementById('fOperator').value.trim(),
       date: document.getElementById('fDate').value,
@@ -1181,6 +1302,7 @@
   function validateRecord(r){
     if(!r.equipmentType) return 'Please select an equipment type.';
     if(!r.unitId) return 'Please enter the unit / asset number.';
+    if((APP_CONFIG.locations || []).length && !r.location) return 'Please select a location.';
     if(!r.operator) return 'Please enter the operator name.';
     if(!r.date) return 'Please select a date.';
     return null;
@@ -1233,6 +1355,7 @@
     editingId = null;
     document.getElementById('editNotice').classList.add('hidden');
     document.getElementById('fUnitId').value = '';
+    document.getElementById('fLocation').value = '';
     document.getElementById('fHours').value = '';
     document.getElementById('fOperator').value = '';
     document.getElementById('fDate').valueAsDate = new Date();
@@ -1254,6 +1377,7 @@
     document.getElementById('editNoticeId').textContent = record.unitId + ' — ' + record.date;
 
     document.getElementById('fUnitId').value = record.unitId || '';
+    document.getElementById('fLocation').value = record.location || '';
     document.getElementById('fHours').value = record.hours || '';
     document.getElementById('fOperator').value = record.operator || '';
     document.getElementById('fDate').value = record.date || '';
@@ -1319,6 +1443,7 @@
 
     html += '<table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px;">';
     html += printRow('Equipment Type', record.equipmentLabel || record.equipmentType) + printRow('Unit / Asset #', record.unitId);
+    html += printRow('Location', record.location);
     html += printRow('Operator', record.operator) + printRow('Date', record.date);
     html += printRow('Shift', record.shift) + printRow('Hour Meter', record.hours);
     html += printRow('Attachment', record.attachment && record.attachment !== 'none' ? (APP_CONFIG.attachmentLabels[record.attachment] || record.attachment) : 'None');
@@ -1377,6 +1502,7 @@
     var tabs = {
       tabNewBtn: 'viewNew',
       tabHistBtn: 'viewHist',
+      tabReportsBtn: 'viewReports',
       tabUsersBtn: 'viewUsers',
       tabConfigBtn: 'viewConfig'
     };
@@ -1387,6 +1513,7 @@
           document.getElementById(tabs[otherBtnId]).classList.toggle('hidden', otherBtnId !== btnId);
         });
         if(btnId === 'tabHistBtn') loadHistory();
+        if(btnId === 'tabReportsBtn') loadReportsData();
         if(btnId === 'tabUsersBtn'){ loadUsers(); loadNotifyEmails(); }
         if(btnId === 'tabConfigBtn') loadConfigEditor();
       });
@@ -1401,6 +1528,7 @@
   function wireHistory(){
     document.getElementById('histFilterEquip').addEventListener('change', renderHistoryList);
     document.getElementById('histFilterUnit').addEventListener('input', renderHistoryList);
+    document.getElementById('histFilterLocation').addEventListener('change', renderHistoryList);
     document.getElementById('histFilterFlag').addEventListener('change', renderHistoryList);
     document.getElementById('closeModalBtn').addEventListener('click', function(){
       document.getElementById('detailModal').classList.add('hidden');
@@ -1410,29 +1538,36 @@
     });
   }
 
+  function mapInspectionRow(r){
+    return {
+      id: r.id,
+      equipmentType: r.equipment_type,
+      equipmentLabel: r.equipment_label,
+      unitId: r.unit_id,
+      location: r.location,
+      operator: r.operator,
+      date: r.inspection_date,
+      shift: r.shift,
+      hours: r.hours,
+      attachment: r.attachment,
+      hasFail: r.has_fail,
+      savedAt: r.saved_at,
+      createdBy: r.created_by
+    };
+  }
+
+  function loadInspectionIndex(){
+    return api('/api/inspections').then(function(rows){
+      historyIndexCache = rows.map(mapInspectionRow);
+      return historyIndexCache;
+    });
+  }
+
   function loadHistory(){
     var list = document.getElementById('histList');
     list.innerHTML = '<div class="empty-state">Loading inspection history&hellip;</div>';
-    api('/api/inspections')
-      .then(function(rows){
-        historyIndexCache = rows.map(function(r){
-          return {
-            id: r.id,
-            equipmentType: r.equipment_type,
-            equipmentLabel: r.equipment_label,
-            unitId: r.unit_id,
-            operator: r.operator,
-            date: r.inspection_date,
-            shift: r.shift,
-            hours: r.hours,
-            attachment: r.attachment,
-            hasFail: r.has_fail,
-            savedAt: r.saved_at,
-            createdBy: r.created_by
-          };
-        });
-        renderHistoryList();
-      })
+    loadInspectionIndex()
+      .then(function(){ renderHistoryList(); })
       .catch(function(e){
         if(handleAuthLoss(e)) return;
         console.error('History load error', e);
@@ -1445,11 +1580,13 @@
     var list = document.getElementById('histList');
     var equipFilter = document.getElementById('histFilterEquip').value;
     var unitFilter = document.getElementById('histFilterUnit').value.trim().toLowerCase();
+    var locationFilter = document.getElementById('histFilterLocation').value;
     var flagFilter = document.getElementById('histFilterFlag').value;
 
     var filtered = historyIndexCache.filter(function(r){
       if(equipFilter && r.equipmentType !== equipFilter) return false;
       if(unitFilter && (r.unitId || '').toLowerCase().indexOf(unitFilter) === -1) return false;
+      if(locationFilter && r.location !== locationFilter) return false;
       if(flagFilter === 'fail' && !r.hasFail) return false;
       return true;
     });
@@ -1468,6 +1605,7 @@
       meta.className = 'hist-meta';
       meta.innerHTML = '<strong>' + escapeHtml(r.equipmentLabel) + ' &mdash; ' + escapeHtml(r.unitId) + '</strong><br>' +
         escapeHtml(r.date) + ' &middot; ' + escapeHtml(r.shift) + ' shift &middot; ' + escapeHtml(r.operator) +
+        (r.location ? ' &middot; ' + escapeHtml(r.location) : '') +
         (r.createdBy ? ' &middot; logged by ' + escapeHtml(r.createdBy) : '') +
         '<div class="hist-flags">' + (r.hasFail ? '<span class="tag fail">Needs attention</span>' : '<span class="tag ok">All clear</span>') +
         (r.attachment && r.attachment !== 'none' && APP_CONFIG.attachmentLabels[r.attachment] ? '<span class="tag ok" style="background:#7CC5EB; color:#213B34;">' + escapeHtml(APP_CONFIG.attachmentLabels[r.attachment]) + '</span>' : '') +
@@ -1532,7 +1670,7 @@
       .then(function(record){
         var content = document.getElementById('detailContent');
         var html = '<h2>' + escapeHtml(record.equipmentLabel) + ' &mdash; ' + escapeHtml(record.unitId) + '</h2>';
-        html += '<p style="font-size:13px; color:#4B5A54;">' + escapeHtml(record.date) + ' &middot; ' + escapeHtml(record.shift) + ' shift &middot; Operator: ' + escapeHtml(record.operator) + ' &middot; Hours: ' + escapeHtml(record.hours || '—') + (record.createdBy ? ' &middot; Logged by ' + escapeHtml(record.createdBy) : '') + '</p>';
+        html += '<p style="font-size:13px; color:#4B5A54;">' + escapeHtml(record.date) + ' &middot; ' + escapeHtml(record.shift) + ' shift &middot; Operator: ' + escapeHtml(record.operator) + ' &middot; Hours: ' + escapeHtml(record.hours || '—') + (record.location ? ' &middot; ' + escapeHtml(record.location) : '') + (record.createdBy ? ' &middot; Logged by ' + escapeHtml(record.createdBy) : '') + '</p>';
 
         function renderDetailGroup(title, items){
           var h = '<h3 style="color:#213B34;">' + title + '</h3>';
@@ -1563,6 +1701,129 @@
         console.error('Detail load error', e);
         showBanner('Could not load that inspection.', 'err');
       });
+  }
+
+  /* ---------------------------------------------------------
+     Reports
+  --------------------------------------------------------- */
+  function wireReports(){
+    ['repFilterLocation','repFilterEquip','repFilterUnit','repFilterOperator','repFilterShift','repFilterFlag','repFilterFrom','repFilterTo'].forEach(function(id){
+      var el = document.getElementById(id);
+      el.addEventListener(el.tagName === 'SELECT' || el.type === 'date' ? 'change' : 'input', renderReports);
+    });
+    document.getElementById('repClearFiltersBtn').addEventListener('click', function(){
+      ['repFilterLocation','repFilterEquip','repFilterUnit','repFilterOperator','repFilterShift','repFilterFlag','repFilterFrom','repFilterTo'].forEach(function(id){
+        document.getElementById(id).value = '';
+      });
+      renderReports();
+    });
+    document.getElementById('repExportBtn').addEventListener('click', exportReportCsv);
+  }
+
+  function loadReportsData(){
+    document.getElementById('repSummary').innerHTML = '<div class="empty-state">Loading&hellip;</div>';
+    loadInspectionIndex()
+      .then(function(){ renderReports(); })
+      .catch(function(e){
+        if(handleAuthLoss(e)) return;
+        console.error('Reports load error', e);
+        document.getElementById('repSummary').innerHTML = '<div class="empty-state">Could not load report data.</div>';
+      });
+  }
+
+  function getReportFiltered(){
+    var locationFilter = document.getElementById('repFilterLocation').value;
+    var equipFilter = document.getElementById('repFilterEquip').value;
+    var unitFilter = document.getElementById('repFilterUnit').value.trim().toLowerCase();
+    var operatorFilter = document.getElementById('repFilterOperator').value.trim().toLowerCase();
+    var shiftFilter = document.getElementById('repFilterShift').value;
+    var flagFilter = document.getElementById('repFilterFlag').value;
+    var fromFilter = document.getElementById('repFilterFrom').value;
+    var toFilter = document.getElementById('repFilterTo').value;
+
+    return historyIndexCache.filter(function(r){
+      if(locationFilter && r.location !== locationFilter) return false;
+      if(equipFilter && r.equipmentType !== equipFilter) return false;
+      if(unitFilter && (r.unitId || '').toLowerCase().indexOf(unitFilter) === -1) return false;
+      if(operatorFilter && (r.operator || '').toLowerCase().indexOf(operatorFilter) === -1) return false;
+      if(shiftFilter && r.shift !== shiftFilter) return false;
+      if(flagFilter === 'fail' && !r.hasFail) return false;
+      if(fromFilter && (r.date || '') < fromFilter) return false;
+      if(toFilter && (r.date || '') > toFilter) return false;
+      return true;
+    });
+  }
+
+  function groupCount(rows, keyFn, fallbackLabel){
+    var groups = {};
+    rows.forEach(function(r){
+      var key = keyFn(r) || fallbackLabel;
+      if(!groups[key]) groups[key] = { total: 0, flagged: 0 };
+      groups[key].total++;
+      if(r.hasFail) groups[key].flagged++;
+    });
+    return groups;
+  }
+
+  function renderGroupTable(container, groups){
+    var keys = Object.keys(groups).sort(function(a,b){ return groups[b].total - groups[a].total; });
+    if(!keys.length){ container.innerHTML = '<div class="empty-state">No data for the current filters.</div>'; return; }
+    var html = '';
+    keys.forEach(function(key){
+      var g = groups[key];
+      html += '<div class="user-row">' +
+        '<div>' + escapeHtml(key) + '</div>' +
+        '<div style="font-size:13px;">' + g.total + ' inspection' + (g.total === 1 ? '' : 's') +
+        (g.flagged ? ' &middot; <span style="color:#B3261E; font-weight:bold;">' + g.flagged + ' flagged</span>' : '') +
+        '</div></div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function renderReports(){
+    var filtered = getReportFiltered();
+    var total = filtered.length;
+    var flagged = filtered.filter(function(r){ return r.hasFail; }).length;
+    var pct = total ? Math.round((flagged / total) * 100) : 0;
+
+    document.getElementById('repSummary').innerHTML =
+      '<div class="grid3">' +
+      '<div class="detail-item"><strong style="font-size:22px; color:#213B34;">' + total + '</strong><div>Total inspections</div></div>' +
+      '<div class="detail-item"><strong style="font-size:22px; color:#B3261E;">' + flagged + '</strong><div>With flagged items</div></div>' +
+      '<div class="detail-item"><strong style="font-size:22px; color:#213B34;">' + pct + '%</strong><div>Flagged rate</div></div>' +
+      '</div>';
+
+    renderGroupTable(document.getElementById('repByLocation'), groupCount(filtered, function(r){ return r.location; }, 'No location set'));
+    renderGroupTable(document.getElementById('repByEquip'), groupCount(filtered, function(r){ return r.equipmentLabel || r.equipmentType; }, 'Unknown'));
+    renderGroupTable(document.getElementById('repByOperator'), groupCount(filtered, function(r){ return r.operator; }, 'Unknown'));
+    renderGroupTable(document.getElementById('repByShift'), groupCount(filtered, function(r){ return r.shift; }, 'Unspecified'));
+  }
+
+  function csvEscape(val){
+    var s = String(val === undefined || val === null ? '' : val);
+    if(/[",\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function exportReportCsv(){
+    var filtered = getReportFiltered();
+    var header = ['Date','Shift','Location','Equipment Type','Unit / Asset #','Operator','Needs Attention','Logged By','Saved At'];
+    var lines = [header.join(',')];
+    filtered.forEach(function(r){
+      lines.push([
+        csvEscape(r.date), csvEscape(r.shift), csvEscape(r.location), csvEscape(r.equipmentLabel || r.equipmentType),
+        csvEscape(r.unitId), csvEscape(r.operator), csvEscape(r.hasFail ? 'Yes' : 'No'), csvEscape(r.createdBy), csvEscape(r.savedAt)
+      ].join(','));
+    });
+    var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'inspection-report-' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   /* ---------------------------------------------------------
@@ -1715,13 +1976,16 @@
           // without re-binding all the one-time event listeners.
           equipSelect.innerHTML = '<option value="">Select equipment&hellip;</option>';
           histEquipFilter.innerHTML = '<option value="">All equipment</option>';
+          repEquipFilter.innerHTML = '<option value="">All equipment</option>';
           Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
             var opt = document.createElement('option');
             opt.value = key;
             opt.textContent = APP_CONFIG.equipmentTypes[key].label;
             equipSelect.appendChild(opt);
             histEquipFilter.appendChild(opt.cloneNode(true));
+            repEquipFilter.appendChild(opt.cloneNode(true));
           });
+          populateLocationSelects();
           var attachSelect = document.getElementById('fAttachment');
           attachSelect.innerHTML = '<option value="none">None</option>';
           Object.keys(APP_CONFIG.attachmentChecks).forEach(function(key){
