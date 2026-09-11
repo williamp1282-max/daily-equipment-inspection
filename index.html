@@ -638,6 +638,7 @@
       <div class="actions-bar" style="justify-content:flex-start;">
         <button class="ghost" id="repClearFiltersBtn" type="button">Clear filters</button>
         <button class="secondary" id="repExportBtn" type="button">Export CSV</button>
+        <button class="secondary" id="repPrintBtn" type="button">Print report</button>
       </div>
     </div>
 
@@ -1718,6 +1719,7 @@
       renderReports();
     });
     document.getElementById('repExportBtn').addEventListener('click', exportReportCsv);
+    document.getElementById('repPrintBtn').addEventListener('click', printReport);
   }
 
   function loadReportsData(){
@@ -1824,6 +1826,100 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  function describeReportFilters(){
+    var parts = [];
+    var loc = document.getElementById('repFilterLocation').value;
+    var equip = document.getElementById('repFilterEquip').value;
+    var unit = document.getElementById('repFilterUnit').value.trim();
+    var operator = document.getElementById('repFilterOperator').value.trim();
+    var shift = document.getElementById('repFilterShift').value;
+    var flag = document.getElementById('repFilterFlag').value;
+    var from = document.getElementById('repFilterFrom').value;
+    var to = document.getElementById('repFilterTo').value;
+
+    if(loc) parts.push('Location: ' + loc);
+    if(equip && APP_CONFIG.equipmentTypes[equip]) parts.push('Equipment: ' + APP_CONFIG.equipmentTypes[equip].label);
+    if(unit) parts.push('Unit contains "' + unit + '"');
+    if(operator) parts.push('Operator contains "' + operator + '"');
+    if(shift) parts.push('Shift: ' + shift);
+    if(flag === 'fail') parts.push('Needs attention items only');
+    if(from || to) parts.push('Date: ' + (from || 'any') + ' to ' + (to || 'any'));
+    return parts.length ? parts.join(' \u00b7 ') : 'All inspections (no filters applied)';
+  }
+
+  function buildReportPrintHtml(filtered){
+    var total = filtered.length;
+    var flaggedCount = filtered.filter(function(r){ return r.hasFail; }).length;
+    var pct = total ? Math.round((flaggedCount / total) * 100) : 0;
+
+    var html = '<div style="font-family:Arial, sans-serif; color:#000;">';
+    html += '<div style="border-bottom:3px solid #213B34; padding-bottom:10px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">';
+    html += '<div style="font-size:20px; font-weight:bold; color:#213B34;">Inspection Report</div>';
+    html += '<div style="font-size:12px;">Printed ' + escapeHtml(new Date().toLocaleString()) + '</div>';
+    html += '</div>';
+
+    html += '<p style="font-size:12.5px; color:#4B5A54; margin-bottom:16px;"><strong>Filters:</strong> ' + escapeHtml(describeReportFilters()) + '</p>';
+
+    html += '<table style="width:100%; border-collapse:collapse; margin-bottom:18px; font-size:13px;">';
+    html += printRow('Total inspections', total);
+    html += printRow('With flagged items', flaggedCount);
+    html += printRow('Flagged rate', pct + '%');
+    html += '</table>';
+
+    function printGroupSection(title, groups){
+      var h = '<h3 style="color:#213B34; border-bottom:1px solid #A1CEAD; padding-bottom:4px; margin-top:18px;">' + title + '</h3>';
+      var keys = Object.keys(groups).sort(function(a,b){ return groups[b].total - groups[a].total; });
+      if(!keys.length){ return h + '<p style="font-size:12.5px; color:#888;">No data.</p>'; }
+      h += '<table style="width:100%; border-collapse:collapse; font-size:12.5px;">';
+      keys.forEach(function(key){
+        var g = groups[key];
+        h += '<tr><td style="padding:4px 8px; border:1px solid #D9E8E2;">' + escapeHtml(key) + '</td>' +
+          '<td style="padding:4px 8px; border:1px solid #D9E8E2; width:20%;">' + g.total + ' total</td>' +
+          '<td style="padding:4px 8px; border:1px solid #D9E8E2; width:20%;">' + g.flagged + ' flagged</td></tr>';
+      });
+      h += '</table>';
+      return h;
+    }
+
+    html += printGroupSection('By Location', groupCount(filtered, function(r){ return r.location; }, 'No location set'));
+    html += printGroupSection('By Equipment Type', groupCount(filtered, function(r){ return r.equipmentLabel || r.equipmentType; }, 'Unknown'));
+    html += printGroupSection('By Operator', groupCount(filtered, function(r){ return r.operator; }, 'Unknown'));
+    html += printGroupSection('By Shift', groupCount(filtered, function(r){ return r.shift; }, 'Unspecified'));
+
+    html += '<h3 style="color:#213B34; border-bottom:1px solid #A1CEAD; padding-bottom:4px; margin-top:18px;">Matching Inspections (' + total + ')</h3>';
+    html += '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
+    html += '<tr>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Date</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Shift</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Location</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Equipment</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Unit #</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Operator</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Status</td>' +
+      '</tr>';
+    filtered.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }).forEach(function(r){
+      html += '<tr>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.date) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.shift) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.location) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.equipmentLabel || r.equipmentType) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.unitId) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.operator) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + (r.hasFail ? 'Needs attention' : 'All clear') + '</td>' +
+        '</tr>';
+    });
+    html += '</table>';
+
+    html += '</div>';
+    return html;
+  }
+
+  function printReport(){
+    var filtered = getReportFiltered();
+    document.getElementById('printArea').innerHTML = buildReportPrintHtml(filtered);
+    window.print();
   }
 
   /* ---------------------------------------------------------
