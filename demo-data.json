@@ -142,7 +142,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
+      "model": "Sennebogen 830 M"
     },
     {
       "equipmentType": "loader",
@@ -280,7 +281,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
+      "model": "John Deere 644L"
     },
     {
       "equipmentType": "skidSteer",
@@ -418,7 +420,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "John Deere 320G"
     },
     {
       "equipmentType": "forklift",
@@ -562,7 +565,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "Toyota 8FGU25"
     },
     {
       "equipmentType": "haulTruck",
@@ -706,7 +710,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
+      "model": "Komatsu HM300"
     },
     {
       "equipmentType": "materialHandler",
@@ -850,7 +855,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "Komatsu PC290LL"
     },
     {
       "equipmentType": "loader",
@@ -988,7 +994,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "CAT 950M"
     },
     {
       "equipmentType": "skidSteer",
@@ -1126,7 +1133,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "CAT 262D3"
     },
     {
       "equipmentType": "forklift",
@@ -1270,7 +1278,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "Crown FC 5252"
     },
     {
       "equipmentType": "haulTruck",
@@ -1414,7 +1423,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "CAT 745"
     },
     {
       "equipmentType": "materialHandler",
@@ -1558,7 +1568,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
+      "model": "CAT MH3059"
     },
     {
       "equipmentType": "loader",
@@ -1696,7 +1707,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "Komatsu WA320"
     },
     {
       "equipmentType": "skidSteer",
@@ -1834,7 +1846,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
+      "model": "Bobcat S650"
     },
     {
       "equipmentType": "forklift",
@@ -1978,7 +1991,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "Hyster H50FT"
     },
     {
       "equipmentType": "haulTruck",
@@ -2122,7 +2136,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "Volvo A40G"
     },
     {
       "equipmentType": "materialHandler",
@@ -2266,7 +2281,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "Sennebogen 830 M"
     },
     {
       "equipmentType": "loader",
@@ -2404,7 +2420,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record for testing reports and filters."
+      "comments": "Demo record for testing reports and filters.",
+      "model": "John Deere 644L"
     },
     {
       "equipmentType": "skidSteer",
@@ -2542,7 +2559,8 @@
       ],
       "attachmentChecklist": [],
       "attachmentLines": [],
-      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
+      "model": "John Deere 320G"
     }
   ]
 }

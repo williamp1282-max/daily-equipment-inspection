@@ -475,6 +475,12 @@
             <option value="">Select equipment&hellip;</option>
           </select>
         </div>
+        <div class="field hidden" id="fModelField">
+          <label for="fModel">Make / Model</label>
+          <select id="fModel">
+            <option value="">Select model&hellip;</option>
+          </select>
+        </div>
         <div class="field">
           <label for="fUnitId">Unit / Asset Number</label>
           <input type="text" id="fUnitId" placeholder="e.g. MH-104">
@@ -925,6 +931,29 @@
   --------------------------------------------------------- */
   var equipSelect, histEquipFilter, repEquipFilter, locationSelects;
 
+  function renderModelOptions(equipKey, preserveValue){
+    var wrapper = document.getElementById('fModelField');
+    var select = document.getElementById('fModel');
+    var current = preserveValue !== undefined ? preserveValue : select.value;
+    var models = (equipKey && APP_CONFIG.equipmentTypes[equipKey] && APP_CONFIG.equipmentTypes[equipKey].models) || [];
+
+    select.innerHTML = '<option value="">Select model&hellip;</option>';
+    models.forEach(function(m){
+      var opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      select.appendChild(opt);
+    });
+
+    if(models.length){
+      wrapper.classList.remove('hidden');
+      select.value = current || '';
+    } else {
+      wrapper.classList.add('hidden');
+      select.value = '';
+    }
+  }
+
   function populateLocationSelects(){
     var selects = [
       document.getElementById('fLocation'),
@@ -979,6 +1008,7 @@
 
     equipSelect.addEventListener('change', function(){
       renderChecklist(equipSelect.value);
+      renderModelOptions(equipSelect.value);
     });
     attachSelect.addEventListener('change', function(e){
       renderAttachment(e.target.value, true);
@@ -1298,6 +1328,7 @@
       id: editingId || undefined,
       equipmentType: equipKey,
       equipmentLabel: equipKey ? APP_CONFIG.equipmentTypes[equipKey].label : '',
+      model: document.getElementById('fModel').value,
       unitId: document.getElementById('fUnitId').value.trim(),
       location: document.getElementById('fLocation').value,
       hours: document.getElementById('fHours').value,
@@ -1379,6 +1410,7 @@
     document.getElementById('fShift').value = 'Day';
     document.getElementById('fComments').value = '';
     equipSelect.value = '';
+    renderModelOptions('');
     document.getElementById('fAttachment').value = 'none';
     attachmentLineState = [];
     currentAttachmentKey = 'none';
@@ -1401,6 +1433,7 @@
     document.getElementById('fShift').value = record.shift || 'Day';
     document.getElementById('fComments').value = record.comments || '';
     equipSelect.value = record.equipmentType || '';
+    renderModelOptions(record.equipmentType || '', record.model || '');
 
     renderFluidItems();
     (record.fluids || []).forEach(function(item, idx){
@@ -1460,6 +1493,7 @@
 
     html += '<table style="width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px;">';
     html += printRow('Equipment Type', record.equipmentLabel || record.equipmentType) + printRow('Unit / Asset #', record.unitId);
+    html += printRow('Make / Model', record.model);
     html += printRow('Location', record.location);
     html += printRow('Operator', record.operator) + printRow('Date', record.date);
     html += printRow('Shift', record.shift) + printRow('Hour Meter', record.hours);
@@ -1686,7 +1720,7 @@
     api('/api/inspection?id=' + encodeURIComponent(id))
       .then(function(record){
         var content = document.getElementById('detailContent');
-        var html = '<h2>' + escapeHtml(record.equipmentLabel) + ' &mdash; ' + escapeHtml(record.unitId) + '</h2>';
+        var html = '<h2>' + escapeHtml(record.equipmentLabel) + (record.model ? ' (' + escapeHtml(record.model) + ')' : '') + ' &mdash; ' + escapeHtml(record.unitId) + '</h2>';
         html += '<p style="font-size:13px; color:#4B5A54;">' + escapeHtml(record.date) + ' &middot; ' + escapeHtml(record.shift) + ' shift &middot; Operator: ' + escapeHtml(record.operator) + ' &middot; Hours: ' + escapeHtml(record.hours || '—') + (record.location ? ' &middot; ' + escapeHtml(record.location) : '') + (record.createdBy ? ' &middot; Logged by ' + escapeHtml(record.createdBy) : '') + '</p>';
 
         function renderDetailGroup(title, items){

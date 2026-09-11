@@ -81,4 +81,4 @@ You'll need to link the project to Vercel (`npx vercel link`) and pull env vars 
 ## Notes
 
 - Photos are compressed client-side (resized + JPEG-compressed) before upload and stored as part of the inspection record in the database.
-- Equipment types, checklist items, fluid checks, and attachment checklists are no longer hardcoded — admins manage them from the **Checklist Setup** tab in the app (edited as JSON). `DEFAULT_CONFIG` in `lib/db.js` is the fallback/reset-to-defaults value.
+- Equipment types, checklist items, fluid checks, attachment checklists, **locations**, and **make/model options per equipment type** are no longer hardcoded — admins manage them from the **Checklist Setup** tab in the app (edited as JSON). `DEFAULT_CONFIG` in `lib/db.js` is the fallback/reset-to-defaults value. On the New Inspection form, picking an equipment type reveals a Make/Model dropdown populated from that type's configured models (hidden entirely if a type has none configured).
