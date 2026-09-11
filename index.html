@@ -587,6 +587,21 @@
 
   <!-- ============ REPORTS VIEW ============ -->
   <section id="viewReports" class="hidden">
+    <div class="card hidden" id="importCard">
+      <h2>Import inspections</h2>
+      <p class="section-note">Admin only. Upload a JSON file shaped like <code>{ "records": [ {...}, {...} ] }</code> — each record uses the same fields as a saved inspection (equipmentType, unitId, operator, date, location, fluids, checklist, etc.). Useful for bulk-loading historical data or demo data.</p>
+      <div id="importBanner"></div>
+      <div class="grid2">
+        <div class="field">
+          <label for="importFile">JSON file</label>
+          <input type="file" id="importFile" accept="application/json,.json">
+        </div>
+      </div>
+      <div class="actions-bar" style="justify-content:flex-start;">
+        <button class="secondary" id="importBtn" type="button">Import</button>
+      </div>
+    </div>
+
     <div class="card">
       <h2>Report filters</h2>
       <div class="grid3">
@@ -873,6 +888,7 @@
     if(user.role === 'admin'){
       document.getElementById('tabUsersBtn').classList.remove('hidden');
       document.getElementById('tabConfigBtn').classList.remove('hidden');
+      document.getElementById('importCard').classList.remove('hidden');
     }
 
     api('/api/config').then(function(config){
@@ -1720,6 +1736,45 @@
     });
     document.getElementById('repExportBtn').addEventListener('click', exportReportCsv);
     document.getElementById('repPrintBtn').addEventListener('click', printReport);
+    document.getElementById('importBtn').addEventListener('click', runImport);
+  }
+
+  function runImport(){
+    clearBannerIn('importBanner');
+    var fileInput = document.getElementById('importFile');
+    var file = fileInput.files[0];
+    if(!file){ showBannerIn('importBanner', 'Choose a JSON file first.', 'err'); return; }
+
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var parsed;
+      try{ parsed = JSON.parse(e.target.result); }
+      catch(err){ showBannerIn('importBanner', 'That file is not valid JSON: ' + err.message, 'err'); return; }
+
+      var records = Array.isArray(parsed) ? parsed : parsed.records;
+      if(!Array.isArray(records) || !records.length){
+        showBannerIn('importBanner', 'Expected either a JSON array of records, or an object like { "records": [...] }.', 'err');
+        return;
+      }
+
+      showBannerIn('importBanner', 'Importing ' + records.length + ' record(s)\u2026', 'ok');
+      api('/api/import', { method: 'POST', body: JSON.stringify({ records: records }) })
+        .then(function(result){
+          var msg = 'Imported ' + result.imported + ' record(s).';
+          if(result.failed){
+            msg += ' ' + result.failed + ' failed: ' + result.errors.slice(0,3).map(function(er){ return '#' + er.index + ' (' + er.error + ')'; }).join(', ');
+            if(result.errors.length > 3) msg += '\u2026';
+          }
+          showBannerIn('importBanner', msg, result.failed ? 'err' : 'ok');
+          fileInput.value = '';
+          loadReportsData();
+        })
+        .catch(function(err){
+          if(handleAuthLoss(err)) return;
+          showBannerIn('importBanner', err.message || 'Import failed.', 'err');
+        });
+    };
+    reader.readAsText(file);
   }
 
   function loadReportsData(){

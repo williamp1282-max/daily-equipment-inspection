@@ -1,0 +1,2548 @@
+{
+  "records": [
+    {
+      "equipmentType": "materialHandler",
+      "equipmentLabel": "Material Handler",
+      "unitId": "MH-101",
+      "location": "Main Yard",
+      "hours": "1200.0",
+      "operator": "Bill Pease",
+      "date": "2026-08-24",
+      "shift": "Day",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "Needs Attention",
+          "notes": "Flagged during walk-around, needs maintenance follow-up.",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Boom and stick condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Cab riser / elevation function",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Counterweight and undercarriage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic hoses and cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Slew ring / rotation bearing",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+    },
+    {
+      "equipmentType": "loader",
+      "equipmentLabel": "Loader",
+      "unitId": "LD-15",
+      "location": "North Site",
+      "hours": "1237.5",
+      "operator": "Maria Gomez",
+      "date": "2026-08-25",
+      "shift": "Night",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "Low",
+          "notes": "Below normal level, topped off \u2014 monitor for a leak.",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Bucket / attachment linkage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Articulation joint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Bucket cutting edge and teeth",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+    },
+    {
+      "equipmentType": "skidSteer",
+      "equipmentLabel": "Skid Steer",
+      "unitId": "SS-07",
+      "location": "South Site",
+      "hours": "1275.0",
+      "operator": "Tom Alvarez",
+      "date": "2026-08-26",
+      "shift": "Weekend",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Attachment locking mechanism / quick coupler",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lift arms and cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Cab door and restraint bar",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Undercarriage, tires or tracks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "forklift",
+      "equipmentLabel": "Forklift",
+      "unitId": "FL-20",
+      "location": "Main Yard",
+      "hours": "1312.5",
+      "operator": "Chris Ng",
+      "date": "2026-08-27",
+      "shift": "Day",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Forks and carriage condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mast and lift chains",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Load backrest extension",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Overhead guard",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Capacity data plate legible",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "haulTruck",
+      "equipmentLabel": "Haul Truck",
+      "unitId": "HT-03",
+      "location": "North Site",
+      "hours": "1350.0",
+      "operator": "Dana Fields",
+      "date": "2026-08-28",
+      "shift": "Night",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "Needs Attention",
+          "notes": "Flagged during walk-around, needs maintenance follow-up.",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Braking system (service and parking)",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Dump body and hoist cylinder",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Articulation joint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Backup camera and alarm system",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tarp system (if equipped)",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+    },
+    {
+      "equipmentType": "materialHandler",
+      "equipmentLabel": "Material Handler",
+      "unitId": "MH-104",
+      "location": "South Site",
+      "hours": "1387.5",
+      "operator": "Jordan Lee",
+      "date": "2026-08-31",
+      "shift": "Weekend",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Boom and stick condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Cab riser / elevation function",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Counterweight and undercarriage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic hoses and cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Slew ring / rotation bearing",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "loader",
+      "equipmentLabel": "Loader",
+      "unitId": "LD-12",
+      "location": "Main Yard",
+      "hours": "1425.0",
+      "operator": "Bill Pease",
+      "date": "2026-09-01",
+      "shift": "Day",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Bucket / attachment linkage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Articulation joint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Bucket cutting edge and teeth",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "skidSteer",
+      "equipmentLabel": "Skid Steer",
+      "unitId": "SS-09",
+      "location": "North Site",
+      "hours": "1462.5",
+      "operator": "Maria Gomez",
+      "date": "2026-09-02",
+      "shift": "Night",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Attachment locking mechanism / quick coupler",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lift arms and cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Cab door and restraint bar",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Undercarriage, tires or tracks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "forklift",
+      "equipmentLabel": "Forklift",
+      "unitId": "FL-25",
+      "location": "South Site",
+      "hours": "1500.0",
+      "operator": "Tom Alvarez",
+      "date": "2026-09-03",
+      "shift": "Weekend",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Forks and carriage condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mast and lift chains",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Load backrest extension",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Overhead guard",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Capacity data plate legible",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "haulTruck",
+      "equipmentLabel": "Haul Truck",
+      "unitId": "HT-05",
+      "location": "Main Yard",
+      "hours": "1537.5",
+      "operator": "Chris Ng",
+      "date": "2026-09-04",
+      "shift": "Day",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Braking system (service and parking)",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Dump body and hoist cylinder",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Articulation joint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Backup camera and alarm system",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tarp system (if equipped)",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "materialHandler",
+      "equipmentLabel": "Material Handler",
+      "unitId": "MH-101",
+      "location": "North Site",
+      "hours": "1575.0",
+      "operator": "Dana Fields",
+      "date": "2026-09-05",
+      "shift": "Night",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "Low",
+          "notes": "Below normal level, topped off \u2014 monitor for a leak.",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Boom and stick condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Cab riser / elevation function",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Counterweight and undercarriage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic hoses and cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Slew ring / rotation bearing",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+    },
+    {
+      "equipmentType": "loader",
+      "equipmentLabel": "Loader",
+      "unitId": "LD-15",
+      "location": "South Site",
+      "hours": "1612.5",
+      "operator": "Jordan Lee",
+      "date": "2026-09-08",
+      "shift": "Weekend",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Bucket / attachment linkage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Articulation joint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Bucket cutting edge and teeth",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "skidSteer",
+      "equipmentLabel": "Skid Steer",
+      "unitId": "SS-07",
+      "location": "Main Yard",
+      "hours": "1650.0",
+      "operator": "Bill Pease",
+      "date": "2026-09-09",
+      "shift": "Day",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "Needs Attention",
+          "notes": "Flagged during walk-around, needs maintenance follow-up.",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Attachment locking mechanism / quick coupler",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lift arms and cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Cab door and restraint bar",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Undercarriage, tires or tracks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+    },
+    {
+      "equipmentType": "forklift",
+      "equipmentLabel": "Forklift",
+      "unitId": "FL-22",
+      "location": "North Site",
+      "hours": "1687.5",
+      "operator": "Maria Gomez",
+      "date": "2026-09-10",
+      "shift": "Night",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Forks and carriage condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mast and lift chains",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Load backrest extension",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Overhead guard",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Capacity data plate legible",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "haulTruck",
+      "equipmentLabel": "Haul Truck",
+      "unitId": "HT-03",
+      "location": "South Site",
+      "hours": "1725.0",
+      "operator": "Tom Alvarez",
+      "date": "2026-09-11",
+      "shift": "Weekend",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Braking system (service and parking)",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Dump body and hoist cylinder",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Articulation joint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Backup camera and alarm system",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tarp system (if equipped)",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "materialHandler",
+      "equipmentLabel": "Material Handler",
+      "unitId": "MH-104",
+      "location": "Main Yard",
+      "hours": "1762.5",
+      "operator": "Chris Ng",
+      "date": "2026-08-29",
+      "shift": "Day",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Boom and stick condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Cab riser / elevation function",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Counterweight and undercarriage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic hoses and cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Slew ring / rotation bearing",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "loader",
+      "equipmentLabel": "Loader",
+      "unitId": "LD-12",
+      "location": "North Site",
+      "hours": "1800.0",
+      "operator": "Dana Fields",
+      "date": "2026-08-30",
+      "shift": "Night",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Bucket / attachment linkage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Articulation joint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Bucket cutting edge and teeth",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record for testing reports and filters."
+    },
+    {
+      "equipmentType": "skidSteer",
+      "equipmentLabel": "Skid Steer",
+      "unitId": "SS-09",
+      "location": "South Site",
+      "hours": "1837.5",
+      "operator": "Jordan Lee",
+      "date": "2026-09-07",
+      "shift": "Weekend",
+      "attachment": "none",
+      "fluids": [
+        {
+          "label": "Engine oil level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Hydraulic fluid level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Coolant level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fuel level",
+          "status": "Low",
+          "notes": "Below normal level, topped off \u2014 monitor for a leak.",
+          "photo": null
+        },
+        {
+          "label": "DEF level",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Grease / lubrication points",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "checklist": [
+        {
+          "label": "Walk-around visual inspection for new damage",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Tires / tracks condition and pressure",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lights, signals and beacon",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Horn and backup alarm",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Mirrors and camera visibility",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Seatbelt and operator restraint",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Fire extinguisher present and charged",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Visible fluid, oil or coolant leaks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Frame and structure condition",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Gauges and warning lights at start-up",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Attachment locking mechanism / quick coupler",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Lift arms and cylinders",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Cab door and restraint bar",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        },
+        {
+          "label": "Undercarriage, tires or tracks",
+          "status": "OK",
+          "notes": "",
+          "photo": null
+        }
+      ],
+      "attachmentChecklist": [],
+      "attachmentLines": [],
+      "comments": "Demo record \u2014 flagged item included for testing alerts and reports."
+    }
+  ]
+}

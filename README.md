@@ -24,7 +24,8 @@ The very first account created (via the one-time setup screen the app shows when
   - `GET/POST/DELETE /api/inspections` — list, create (any signed-in user), delete (admin only); posting with an existing inspection's id is treated as an edit and is admin-only
   - `GET /api/inspection` — fetch one full inspection record (`?id=...`)
 - **Email alerts:** via [Resend](https://resend.com) (`lib/email.js`). Fires after an inspection with a flagged item is saved, to whichever addresses are configured in the app's Users tab. No-ops safely if `RESEND_API_KEY` isn't set.
-- **Reports:** a dedicated tab filters inspections by location, equipment type, asset/unit #, operator, shift, and date range, shows summary counts and breakdowns by each dimension, and exports the filtered results as CSV.
+- **Reports:** a dedicated tab filters inspections by location, equipment type, asset/unit #, operator, shift, and date range, shows summary counts and breakdowns by each dimension, and exports the filtered results as CSV or a printable report.
+- **Bulk import:** `POST /api/import` (admin only) accepts `{ "records": [...] }` and inserts them, skipping and reporting any individually invalid records rather than failing the whole batch. There's an "Import inspections" panel on the Reports tab for admins that does this from a JSON file. `demo-data.json` in this repo is 18 sample inspections (spread across all locations/equipment types/operators/shifts, 6 flagged) for testing History, Reports, and email alerts.
 - **Database:** Postgres via the standard `pg` driver (works with Neon, Supabase, or any Postgres — see setup below). Tables are created automatically the first time the app runs.
 - **Auth:** bcrypt-hashed passwords, JWT session tokens in an httpOnly cookie.
 
