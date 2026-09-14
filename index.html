@@ -828,6 +828,33 @@
     <div class="card">
       <h2>Assets / Units</h2>
       <p class="section-note">Registering a unit here lets it autocomplete on the New Inspection form, and auto-fills equipment type, model, location, region, department, and cost center when its Unit/Asset Number is typed.</p>
+
+      <div class="grid3" style="margin-bottom:6px;">
+        <div class="field">
+          <label for="acAssetFilterEquip">Filter by equipment type</label>
+          <select id="acAssetFilterEquip"><option value="">All equipment</option></select>
+        </div>
+        <div class="field">
+          <label for="acAssetFilterLocation">Filter by location</label>
+          <select id="acAssetFilterLocation"><option value="">All locations</option></select>
+        </div>
+        <div class="field">
+          <label for="acAssetFilterRegion">Filter by region</label>
+          <select id="acAssetFilterRegion"><option value="">All regions</option></select>
+        </div>
+        <div class="field">
+          <label for="acAssetFilterDepartment">Filter by department</label>
+          <select id="acAssetFilterDepartment"><option value="">All departments</option></select>
+        </div>
+        <div class="field">
+          <label for="acAssetFilterCostCenter">Filter by cost center</label>
+          <select id="acAssetFilterCostCenter"><option value="">All cost centers</option></select>
+        </div>
+      </div>
+      <div class="actions-bar" style="justify-content:flex-start; margin-bottom:12px;">
+        <button class="secondary" id="acPrintInventoryBtn" type="button">Print inventory</button>
+      </div>
+
       <div id="acAssets"></div>
       <h3 style="font-size:14px; color:var(--dark-green); margin:16px 0 8px; border-top:1px solid var(--pale-green); padding-top:14px;">Add / update a unit</h3>
       <div class="grid3">
@@ -2765,15 +2792,38 @@
       if(current) sel.value = current;
     });
 
+    var filterPairs = [
+      { id: 'acAssetFilterLocation', values: APP_CONFIG.locations || [], allLabel: 'All locations' },
+      { id: 'acAssetFilterRegion', values: APP_CONFIG.regions || [], allLabel: 'All regions' },
+      { id: 'acAssetFilterDepartment', values: APP_CONFIG.departments || [], allLabel: 'All departments' },
+      { id: 'acAssetFilterCostCenter', values: APP_CONFIG.costCenters || [], allLabel: 'All cost centers' }
+    ];
+    filterPairs.forEach(function(p){
+      var sel = document.getElementById(p.id);
+      var current = sel.value;
+      sel.innerHTML = '<option value="">' + p.allLabel + '</option>';
+      p.values.forEach(function(v){
+        var opt = document.createElement('option');
+        opt.value = v; opt.textContent = v;
+        sel.appendChild(opt);
+      });
+      if(current) sel.value = current;
+    });
+
     var equipSel = document.getElementById('acAssetEquipType');
     var currentEquip = equipSel.value;
     equipSel.innerHTML = '<option value="">Select&hellip;</option>';
+    var equipFilterSel = document.getElementById('acAssetFilterEquip');
+    var currentEquipFilter = equipFilterSel.value;
+    equipFilterSel.innerHTML = '<option value="">All equipment</option>';
     Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
       var opt = document.createElement('option');
       opt.value = key; opt.textContent = APP_CONFIG.equipmentTypes[key].label;
       equipSel.appendChild(opt);
+      equipFilterSel.appendChild(opt.cloneNode(true));
     });
     if(currentEquip) equipSel.value = currentEquip;
+    if(currentEquipFilter) equipFilterSel.value = currentEquipFilter;
     renderAssetModelOptions();
   }
 
@@ -2842,9 +2892,32 @@
     });
   }
 
+  var assetsAdminCache = [];
+
+  function getFilteredAssets(){
+    var equipFilter = document.getElementById('acAssetFilterEquip').value;
+    var locationFilter = document.getElementById('acAssetFilterLocation').value;
+    var regionFilter = document.getElementById('acAssetFilterRegion').value;
+    var departmentFilter = document.getElementById('acAssetFilterDepartment').value;
+    var costCenterFilter = document.getElementById('acAssetFilterCostCenter').value;
+    return assetsAdminCache.filter(function(a){
+      if(equipFilter && a.equipment_type !== equipFilter) return false;
+      if(locationFilter && a.location !== locationFilter) return false;
+      if(regionFilter && a.region !== regionFilter) return false;
+      if(departmentFilter && a.department !== departmentFilter) return false;
+      if(costCenterFilter && a.cost_center !== costCenterFilter) return false;
+      return true;
+    });
+  }
+
+  function renderFilteredAssets(){
+    renderAssetsSection(getFilteredAssets());
+  }
+
   function loadAssetsForAdminCenter(){
     return api('/api/assets').then(function(rows){
-      renderAssetsSection(rows);
+      assetsAdminCache = rows;
+      renderFilteredAssets();
       return rows;
     }).catch(function(e){
       if(handleAuthLoss(e)) return;
@@ -2852,8 +2925,94 @@
     });
   }
 
+  function assetInventoryGroupCount(rows, keyFn, fallbackLabel){
+    var groups = {};
+    rows.forEach(function(a){
+      var key = keyFn(a) || fallbackLabel;
+      if(!groups[key]) groups[key] = 0;
+      groups[key]++;
+    });
+    return groups;
+  }
+
+  function printGroupCountSection(title, groups){
+    var h = '<h3 style="color:#213B34; border-bottom:1px solid #A1CEAD; padding-bottom:4px; margin-top:18px;">' + title + '</h3>';
+    var keys = Object.keys(groups).sort(function(a,b){ return groups[b] - groups[a]; });
+    if(!keys.length){ return h + '<p style="font-size:12.5px; color:#888;">No data.</p>'; }
+    h += '<table style="width:100%; border-collapse:collapse; font-size:12.5px;">';
+    keys.forEach(function(key){
+      h += '<tr><td style="padding:4px 8px; border:1px solid #D9E8E2;">' + escapeHtml(key) + '</td>' +
+        '<td style="padding:4px 8px; border:1px solid #D9E8E2; width:20%;">' + groups[key] + ' unit' + (groups[key] === 1 ? '' : 's') + '</td></tr>';
+    });
+    h += '</table>';
+    return h;
+  }
+
+  function describeAssetFilters(){
+    var parts = [];
+    var equip = document.getElementById('acAssetFilterEquip').value;
+    var loc = document.getElementById('acAssetFilterLocation').value;
+    var region = document.getElementById('acAssetFilterRegion').value;
+    var dept = document.getElementById('acAssetFilterDepartment').value;
+    var cc = document.getElementById('acAssetFilterCostCenter').value;
+    if(equip && APP_CONFIG.equipmentTypes[equip]) parts.push('Equipment: ' + APP_CONFIG.equipmentTypes[equip].label);
+    if(loc) parts.push('Location: ' + loc);
+    if(region) parts.push('Region: ' + region);
+    if(dept) parts.push('Department: ' + dept);
+    if(cc) parts.push('Cost center: ' + cc);
+    return parts.length ? parts.join(' \u00b7 ') : 'All registered units';
+  }
+
+  function printAssetInventory(){
+    var rows = getFilteredAssets();
+    var html = '<div style="font-family:Arial, sans-serif; color:#000;">';
+    html += '<div style="border-bottom:3px solid #213B34; padding-bottom:10px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">';
+    html += '<div style="font-size:20px; font-weight:bold; color:#213B34;">Asset Inventory</div>';
+    html += '<div style="font-size:12px;">Printed ' + escapeHtml(new Date().toLocaleString()) + '</div>';
+    html += '</div>';
+    html += '<p style="font-size:12.5px; color:#4B5A54; margin-bottom:16px;"><strong>Filters:</strong> ' + escapeHtml(describeAssetFilters()) + '</p>';
+    html += '<p style="font-size:13px; margin-bottom:16px;"><strong>Total units:</strong> ' + rows.length + '</p>';
+
+    html += printGroupCountSection('By Equipment Type', assetInventoryGroupCount(rows, function(a){ return APP_CONFIG.equipmentTypes[a.equipment_type] ? APP_CONFIG.equipmentTypes[a.equipment_type].label : a.equipment_type; }, 'Unspecified'));
+    html += printGroupCountSection('By Location', assetInventoryGroupCount(rows, function(a){ return a.location; }, 'No location set'));
+    html += printGroupCountSection('By Region', assetInventoryGroupCount(rows, function(a){ return a.region; }, 'No region set'));
+    html += printGroupCountSection('By Department', assetInventoryGroupCount(rows, function(a){ return a.department; }, 'No department set'));
+    html += printGroupCountSection('By Cost Center', assetInventoryGroupCount(rows, function(a){ return a.cost_center; }, 'No cost center set'));
+
+    html += '<h3 style="color:#213B34; border-bottom:1px solid #A1CEAD; padding-bottom:4px; margin-top:18px;">Full Inventory (' + rows.length + ')</h3>';
+    html += '<table style="width:100%; border-collapse:collapse; font-size:12px;">';
+    html += '<tr>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Unit / Asset #</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Equipment Type</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Make / Model</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Location</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Region</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Department</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Cost Center</td>' +
+      '</tr>';
+    rows.slice().sort(function(a,b){ return (a.unit_id||'').localeCompare(b.unit_id||''); }).forEach(function(a){
+      html += '<tr>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(a.unit_id) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(APP_CONFIG.equipmentTypes[a.equipment_type] ? APP_CONFIG.equipmentTypes[a.equipment_type].label : a.equipment_type) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(a.model) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(a.location) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(a.region) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(a.department) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(a.cost_center) + '</td>' +
+        '</tr>';
+    });
+    html += '</table></div>';
+
+    document.getElementById('printArea').innerHTML = html;
+    window.print();
+  }
+
   function wireAdminCenter(){
     document.getElementById('acAssetEquipType').addEventListener('change', renderAssetModelOptions);
+    ['acAssetFilterEquip','acAssetFilterLocation','acAssetFilterRegion','acAssetFilterDepartment','acAssetFilterCostCenter'].forEach(function(id){
+      document.getElementById(id).addEventListener('change', renderFilteredAssets);
+    });
+    document.getElementById('acPrintInventoryBtn').addEventListener('click', printAssetInventory);
     document.getElementById('acSaveAssetBtn').addEventListener('click', function(){
       clearBannerIn('acBanner');
       var unitId = document.getElementById('acAssetUnitId').value.trim();
