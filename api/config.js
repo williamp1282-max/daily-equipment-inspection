@@ -29,7 +29,7 @@ export default async function handler(req, res) {
         res.status(400).json({ error: 'Request body must be a JSON config object.' });
         return;
       }
-      const required = ['commonItems', 'equipmentTypes', 'fluidItems', 'attachmentChecks', 'attachmentLabels', 'defaultLines', 'locations'];
+      const required = ['commonItems', 'equipmentTypes', 'fluidItems', 'attachmentChecks', 'attachmentLabels', 'defaultLines', 'locations', 'regions', 'departments', 'costCenters'];
       const missing = required.filter((k) => !(k in config));
       if (missing.length) {
         res.status(400).json({ error: `Config is missing required key(s): ${missing.join(', ')}` });

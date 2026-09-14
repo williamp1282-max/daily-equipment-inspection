@@ -494,6 +494,24 @@
           </select>
         </div>
         <div class="field">
+          <label for="fRegion">Region</label>
+          <select id="fRegion">
+            <option value="">Select region&hellip;</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fDepartment">Department</label>
+          <select id="fDepartment">
+            <option value="">Select department&hellip;</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fCostCenter">Cost Center</label>
+          <select id="fCostCenter">
+            <option value="">Select cost center&hellip;</option>
+          </select>
+        </div>
+        <div class="field">
           <label for="fHours">Hour Meter Reading</label>
           <input type="number" id="fHours" placeholder="e.g. 8421.5" step="0.1" min="0">
         </div>
@@ -582,6 +600,12 @@
           </select>
         </div>
         <div class="field">
+          <label for="histFilterRegion">Filter by region</label>
+          <select id="histFilterRegion">
+            <option value="">All regions</option>
+          </select>
+        </div>
+        <div class="field">
           <label for="histFilterFlag">Show only</label>
           <select id="histFilterFlag">
             <option value="">All results</option>
@@ -617,6 +641,24 @@
           <label for="repFilterLocation">Location</label>
           <select id="repFilterLocation">
             <option value="">All locations</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="repFilterRegion">Region</label>
+          <select id="repFilterRegion">
+            <option value="">All regions</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="repFilterDepartment">Department</label>
+          <select id="repFilterDepartment">
+            <option value="">All departments</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="repFilterCostCenter">Cost center</label>
+          <select id="repFilterCostCenter">
+            <option value="">All cost centers</option>
           </select>
         </div>
         <div class="field">
@@ -674,6 +716,14 @@
       <div class="card">
         <h2>By Location</h2>
         <div id="repByLocation"></div>
+      </div>
+      <div class="card">
+        <h2>By Region</h2>
+        <div id="repByRegion"></div>
+      </div>
+      <div class="card">
+        <h2>By Department</h2>
+        <div id="repByDepartment"></div>
       </div>
       <div class="card">
         <h2>By Equipment Type</h2>
@@ -1011,6 +1061,32 @@
     });
   }
 
+  function populateOrgFieldSelects(){
+    var groups = [
+      { configKey: 'regions', formId: 'fRegion', formLabel: 'Select region&hellip;', filterLabel: 'All regions', filterIds: ['histFilterRegion','repFilterRegion'] },
+      { configKey: 'departments', formId: 'fDepartment', formLabel: 'Select department&hellip;', filterLabel: 'All departments', filterIds: ['repFilterDepartment'] },
+      { configKey: 'costCenters', formId: 'fCostCenter', formLabel: 'Select cost center&hellip;', filterLabel: 'All cost centers', filterIds: ['repFilterCostCenter'] }
+    ];
+    groups.forEach(function(g){
+      var values = APP_CONFIG[g.configKey] || [];
+      var allIds = [g.formId].concat(g.filterIds);
+      allIds.forEach(function(id){
+        var sel = document.getElementById(id);
+        if(!sel) return;
+        var isFilter = id !== g.formId;
+        var current = sel.value;
+        sel.innerHTML = isFilter ? '<option value="">' + g.filterLabel + '</option>' : '<option value="">' + g.formLabel + '</option>';
+        values.forEach(function(v){
+          var opt = document.createElement('option');
+          opt.value = v;
+          opt.textContent = v;
+          sel.appendChild(opt);
+        });
+        if(current) sel.value = current;
+      });
+    });
+  }
+
   function initFormFromConfig(){
     equipSelect = document.getElementById('fEquipType');
     histEquipFilter = document.getElementById('histFilterEquip');
@@ -1033,6 +1109,7 @@
     });
 
     populateLocationSelects();
+    populateOrgFieldSelects();
 
     var attachSelect = document.getElementById('fAttachment');
     attachSelect.innerHTML = '<option value="none">None</option>';
@@ -1371,6 +1448,9 @@
       model: document.getElementById('fModel').value,
       unitId: document.getElementById('fUnitId').value.trim(),
       location: document.getElementById('fLocation').value,
+      region: document.getElementById('fRegion').value,
+      department: document.getElementById('fDepartment').value,
+      costCenter: document.getElementById('fCostCenter').value,
       hours: document.getElementById('fHours').value,
       operator: document.getElementById('fOperator').value.trim(),
       date: document.getElementById('fDate').value,
@@ -1452,6 +1532,9 @@
     document.getElementById('editNotice').classList.add('hidden');
     document.getElementById('fUnitId').value = '';
     document.getElementById('fLocation').value = '';
+    document.getElementById('fRegion').value = '';
+    document.getElementById('fDepartment').value = '';
+    document.getElementById('fCostCenter').value = '';
     document.getElementById('fHours').value = '';
     document.getElementById('fOperator').value = '';
     document.getElementById('fDate').valueAsDate = new Date();
@@ -1475,6 +1558,9 @@
 
     document.getElementById('fUnitId').value = record.unitId || '';
     document.getElementById('fLocation').value = record.location || '';
+    document.getElementById('fRegion').value = record.region || '';
+    document.getElementById('fDepartment').value = record.department || '';
+    document.getElementById('fCostCenter').value = record.costCenter || '';
     document.getElementById('fHours').value = record.hours || '';
     document.getElementById('fOperator').value = record.operator || '';
     document.getElementById('fDate').value = record.date || '';
@@ -1543,6 +1629,9 @@
     html += printRow('Equipment Type', record.equipmentLabel || record.equipmentType) + printRow('Unit / Asset #', record.unitId);
     html += printRow('Make / Model', record.model);
     html += printRow('Location', record.location);
+    html += printRow('Region', record.region);
+    html += printRow('Department', record.department);
+    html += printRow('Cost Center', record.costCenter);
     html += printRow('Operator', record.operator) + printRow('Date', record.date);
     html += printRow('Shift', record.shift) + printRow('Hour Meter', record.hours);
     html += printRow('Attachment', record.attachment && record.attachment !== 'none' ? (APP_CONFIG.attachmentLabels[record.attachment] || record.attachment) : 'None');
@@ -1630,6 +1719,7 @@
     document.getElementById('histFilterEquip').addEventListener('change', renderHistoryList);
     document.getElementById('histFilterUnit').addEventListener('input', renderHistoryList);
     document.getElementById('histFilterLocation').addEventListener('change', renderHistoryList);
+    document.getElementById('histFilterRegion').addEventListener('change', renderHistoryList);
     document.getElementById('histFilterFlag').addEventListener('change', renderHistoryList);
     document.getElementById('closeModalBtn').addEventListener('click', function(){
       document.getElementById('detailModal').classList.add('hidden');
@@ -1646,6 +1736,9 @@
       equipmentLabel: r.equipment_label,
       unitId: r.unit_id,
       location: r.location,
+      region: r.region,
+      department: r.department,
+      costCenter: r.cost_center,
       operator: r.operator,
       date: r.inspection_date,
       shift: r.shift,
@@ -1682,12 +1775,14 @@
     var equipFilter = document.getElementById('histFilterEquip').value;
     var unitFilter = document.getElementById('histFilterUnit').value.trim().toLowerCase();
     var locationFilter = document.getElementById('histFilterLocation').value;
+    var regionFilter = document.getElementById('histFilterRegion').value;
     var flagFilter = document.getElementById('histFilterFlag').value;
 
     var filtered = historyIndexCache.filter(function(r){
       if(equipFilter && r.equipmentType !== equipFilter) return false;
       if(unitFilter && (r.unitId || '').toLowerCase().indexOf(unitFilter) === -1) return false;
       if(locationFilter && r.location !== locationFilter) return false;
+      if(regionFilter && r.region !== regionFilter) return false;
       if(flagFilter === 'fail' && !r.hasFail) return false;
       return true;
     });
@@ -1707,6 +1802,7 @@
       meta.innerHTML = '<strong>' + escapeHtml(r.equipmentLabel) + ' &mdash; ' + escapeHtml(r.unitId) + '</strong><br>' +
         escapeHtml(r.date) + ' &middot; ' + escapeHtml(r.shift) + ' shift &middot; ' + escapeHtml(r.operator) +
         (r.location ? ' &middot; ' + escapeHtml(r.location) : '') +
+        (r.region ? ' &middot; ' + escapeHtml(r.region) : '') +
         (r.createdBy ? ' &middot; logged by ' + escapeHtml(r.createdBy) : '') +
         '<div class="hist-flags">' + (r.hasFail ? '<span class="tag fail">Needs attention</span>' : '<span class="tag ok">All clear</span>') +
         (r.attachment && r.attachment !== 'none' && APP_CONFIG.attachmentLabels[r.attachment] ? '<span class="tag ok" style="background:#7CC5EB; color:#213B34;">' + escapeHtml(APP_CONFIG.attachmentLabels[r.attachment]) + '</span>' : '') +
@@ -1771,7 +1867,7 @@
       .then(function(record){
         var content = document.getElementById('detailContent');
         var html = '<h2>' + escapeHtml(record.equipmentLabel) + (record.model ? ' (' + escapeHtml(record.model) + ')' : '') + ' &mdash; ' + escapeHtml(record.unitId) + '</h2>';
-        html += '<p style="font-size:13px; color:#4B5A54;">' + escapeHtml(record.date) + ' &middot; ' + escapeHtml(record.shift) + ' shift &middot; Operator: ' + escapeHtml(record.operator) + ' &middot; Hours: ' + escapeHtml(record.hours || '—') + (record.location ? ' &middot; ' + escapeHtml(record.location) : '') + (record.createdBy ? ' &middot; Logged by ' + escapeHtml(record.createdBy) : '') + '</p>';
+        html += '<p style="font-size:13px; color:#4B5A54;">' + escapeHtml(record.date) + ' &middot; ' + escapeHtml(record.shift) + ' shift &middot; Operator: ' + escapeHtml(record.operator) + ' &middot; Hours: ' + escapeHtml(record.hours || '—') + (record.location ? ' &middot; ' + escapeHtml(record.location) : '') + (record.region ? ' &middot; ' + escapeHtml(record.region) : '') + (record.department ? ' &middot; ' + escapeHtml(record.department) : '') + (record.costCenter ? ' &middot; ' + escapeHtml(record.costCenter) : '') + (record.createdBy ? ' &middot; Logged by ' + escapeHtml(record.createdBy) : '') + '</p>';
 
         function renderDetailGroup(title, items){
           var h = '<h3 style="color:#213B34;">' + title + '</h3>';
@@ -1808,12 +1904,12 @@
      Reports
   --------------------------------------------------------- */
   function wireReports(){
-    ['repFilterLocation','repFilterEquip','repFilterUnit','repFilterOperator','repFilterShift','repFilterFlag','repFilterFrom','repFilterTo'].forEach(function(id){
+    ['repFilterLocation','repFilterRegion','repFilterDepartment','repFilterCostCenter','repFilterEquip','repFilterUnit','repFilterOperator','repFilterShift','repFilterFlag','repFilterFrom','repFilterTo'].forEach(function(id){
       var el = document.getElementById(id);
       el.addEventListener(el.tagName === 'SELECT' || el.type === 'date' ? 'change' : 'input', renderReports);
     });
     document.getElementById('repClearFiltersBtn').addEventListener('click', function(){
-      ['repFilterLocation','repFilterEquip','repFilterUnit','repFilterOperator','repFilterShift','repFilterFlag','repFilterFrom','repFilterTo'].forEach(function(id){
+      ['repFilterLocation','repFilterRegion','repFilterDepartment','repFilterCostCenter','repFilterEquip','repFilterUnit','repFilterOperator','repFilterShift','repFilterFlag','repFilterFrom','repFilterTo'].forEach(function(id){
         document.getElementById(id).value = '';
       });
       renderReports();
@@ -1874,6 +1970,9 @@
 
   function getReportFiltered(){
     var locationFilter = document.getElementById('repFilterLocation').value;
+    var regionFilter = document.getElementById('repFilterRegion').value;
+    var departmentFilter = document.getElementById('repFilterDepartment').value;
+    var costCenterFilter = document.getElementById('repFilterCostCenter').value;
     var equipFilter = document.getElementById('repFilterEquip').value;
     var unitFilter = document.getElementById('repFilterUnit').value.trim().toLowerCase();
     var operatorFilter = document.getElementById('repFilterOperator').value.trim().toLowerCase();
@@ -1884,6 +1983,9 @@
 
     return historyIndexCache.filter(function(r){
       if(locationFilter && r.location !== locationFilter) return false;
+      if(regionFilter && r.region !== regionFilter) return false;
+      if(departmentFilter && r.department !== departmentFilter) return false;
+      if(costCenterFilter && r.costCenter !== costCenterFilter) return false;
       if(equipFilter && r.equipmentType !== equipFilter) return false;
       if(unitFilter && (r.unitId || '').toLowerCase().indexOf(unitFilter) === -1) return false;
       if(operatorFilter && (r.operator || '').toLowerCase().indexOf(operatorFilter) === -1) return false;
@@ -1935,6 +2037,8 @@
       '</div>';
 
     renderGroupTable(document.getElementById('repByLocation'), groupCount(filtered, function(r){ return r.location; }, 'No location set'));
+    renderGroupTable(document.getElementById('repByRegion'), groupCount(filtered, function(r){ return r.region; }, 'No region set'));
+    renderGroupTable(document.getElementById('repByDepartment'), groupCount(filtered, function(r){ return r.department; }, 'No department set'));
     renderGroupTable(document.getElementById('repByEquip'), groupCount(filtered, function(r){ return r.equipmentLabel || r.equipmentType; }, 'Unknown'));
     renderGroupTable(document.getElementById('repByOperator'), groupCount(filtered, function(r){ return r.operator; }, 'Unknown'));
     renderGroupTable(document.getElementById('repByShift'), groupCount(filtered, function(r){ return r.shift; }, 'Unspecified'));
@@ -1948,12 +2052,12 @@
 
   function exportReportCsv(){
     var filtered = getReportFiltered();
-    var header = ['Date','Shift','Location','Equipment Type','Unit / Asset #','Operator','Needs Attention','Logged By','Saved At'];
+    var header = ['Date','Shift','Location','Region','Department','Cost Center','Equipment Type','Unit / Asset #','Operator','Needs Attention','Logged By','Saved At'];
     var lines = [header.join(',')];
     filtered.forEach(function(r){
       lines.push([
-        csvEscape(r.date), csvEscape(r.shift), csvEscape(r.location), csvEscape(r.equipmentLabel || r.equipmentType),
-        csvEscape(r.unitId), csvEscape(r.operator), csvEscape(r.hasFail ? 'Yes' : 'No'), csvEscape(r.createdBy), csvEscape(r.savedAt)
+        csvEscape(r.date), csvEscape(r.shift), csvEscape(r.location), csvEscape(r.region), csvEscape(r.department), csvEscape(r.costCenter),
+        csvEscape(r.equipmentLabel || r.equipmentType), csvEscape(r.unitId), csvEscape(r.operator), csvEscape(r.hasFail ? 'Yes' : 'No'), csvEscape(r.createdBy), csvEscape(r.savedAt)
       ].join(','));
     });
     var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
@@ -1970,6 +2074,9 @@
   function describeReportFilters(){
     var parts = [];
     var loc = document.getElementById('repFilterLocation').value;
+    var region = document.getElementById('repFilterRegion').value;
+    var department = document.getElementById('repFilterDepartment').value;
+    var costCenter = document.getElementById('repFilterCostCenter').value;
     var equip = document.getElementById('repFilterEquip').value;
     var unit = document.getElementById('repFilterUnit').value.trim();
     var operator = document.getElementById('repFilterOperator').value.trim();
@@ -1979,6 +2086,9 @@
     var to = document.getElementById('repFilterTo').value;
 
     if(loc) parts.push('Location: ' + loc);
+    if(region) parts.push('Region: ' + region);
+    if(department) parts.push('Department: ' + department);
+    if(costCenter) parts.push('Cost center: ' + costCenter);
     if(equip && APP_CONFIG.equipmentTypes[equip]) parts.push('Equipment: ' + APP_CONFIG.equipmentTypes[equip].label);
     if(unit) parts.push('Unit contains "' + unit + '"');
     if(operator) parts.push('Operator contains "' + operator + '"');
@@ -2023,6 +2133,8 @@
     }
 
     html += printGroupSection('By Location', groupCount(filtered, function(r){ return r.location; }, 'No location set'));
+    html += printGroupSection('By Region', groupCount(filtered, function(r){ return r.region; }, 'No region set'));
+    html += printGroupSection('By Department', groupCount(filtered, function(r){ return r.department; }, 'No department set'));
     html += printGroupSection('By Equipment Type', groupCount(filtered, function(r){ return r.equipmentLabel || r.equipmentType; }, 'Unknown'));
     html += printGroupSection('By Operator', groupCount(filtered, function(r){ return r.operator; }, 'Unknown'));
     html += printGroupSection('By Shift', groupCount(filtered, function(r){ return r.shift; }, 'Unspecified'));
@@ -2033,6 +2145,8 @@
       '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Date</td>' +
       '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Shift</td>' +
       '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Location</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Region</td>' +
+      '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Department</td>' +
       '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Equipment</td>' +
       '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Unit #</td>' +
       '<td style="padding:4px 6px; border:1px solid #D9E8E2; font-weight:bold;">Operator</td>' +
@@ -2043,6 +2157,8 @@
         '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.date) + '</td>' +
         '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.shift) + '</td>' +
         '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.location) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.region) + '</td>' +
+        '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.department) + '</td>' +
         '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.equipmentLabel || r.equipmentType) + '</td>' +
         '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.unitId) + '</td>' +
         '<td style="padding:4px 6px; border:1px solid #D9E8E2;">' + escapeHtml(r.operator) + '</td>' +
@@ -2133,6 +2249,7 @@
       '<div>' +
       '<strong style="color:#213B34;">' + escapeHtml(wo.equipment_label || wo.equipment_type) + ' &mdash; ' + escapeHtml(wo.unit_id) + '</strong>' +
       (wo.location ? ' <span style="font-size:12.5px; color:#4B5A54;">(' + escapeHtml(wo.location) + ')</span>' : '') +
+      (wo.region || wo.department ? '<div style="font-size:12px; color:#6C7A75;">' + [wo.region, wo.department].filter(Boolean).map(escapeHtml).join(' \u00b7 ') + '</div>' : '') +
       '<div style="font-size:13px; margin-top:2px;">' + escapeHtml(wo.item_label) + ' — ' + escapeHtml(wo.item_status) + '</div>' +
       (wo.item_notes ? '<div style="font-size:12.5px; color:#4B5A54; margin-top:2px;">' + escapeHtml(wo.item_notes) + '</div>' : '') +
       '</div>' +
@@ -2397,6 +2514,7 @@
             woEquipFilter.appendChild(opt.cloneNode(true));
           });
           populateLocationSelects();
+    populateOrgFieldSelects();
           var attachSelect = document.getElementById('fAttachment');
           attachSelect.innerHTML = '<option value="none">None</option>';
           Object.keys(APP_CONFIG.attachmentChecks).forEach(function(key){

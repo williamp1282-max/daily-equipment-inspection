@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
       // Open/In Progress first, then Closed; newest first within each.
       const result = await sql`
-        SELECT id, inspection_id, equipment_type, equipment_label, unit_id, location,
+        SELECT id, inspection_id, equipment_type, equipment_label, unit_id, location, region, department, cost_center,
                item_group, item_label, item_status, item_notes, photo,
                status, created_at, created_by, resolution_notes, closed_at, closed_by, updated_at
         FROM work_orders

@@ -50,11 +50,13 @@ export default async function handler(req, res) {
         await sql`
           INSERT INTO inspections (
             id, equipment_type, equipment_label, unit_id, operator,
-            inspection_date, shift, hours, attachment, has_fail, saved_at, created_by, location, data
+            inspection_date, shift, hours, attachment, has_fail, saved_at, created_by, location,
+            region, department, cost_center, data
           ) VALUES (
             ${id}, ${record.equipmentType}, ${record.equipmentLabel || ''}, ${record.unitId}, ${record.operator},
             ${record.date}, ${record.shift || ''}, ${record.hours || ''}, ${record.attachment || 'none'},
-            ${hasFail}, ${savedAt}, ${createdBy}, ${record.location || ''}, ${JSON.stringify(fullRecord)}
+            ${hasFail}, ${savedAt}, ${createdBy}, ${record.location || ''},
+            ${record.region || ''}, ${record.department || ''}, ${record.costCenter || ''}, ${JSON.stringify(fullRecord)}
           );
         `;
         imported++;

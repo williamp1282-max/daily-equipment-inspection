@@ -143,7 +143,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
-      "model": "Sennebogen 830 M"
+      "model": "Sennebogen 830 M",
+      "region": "Midwest",
+      "department": "Maintenance",
+      "costCenter": "CC-1000"
     },
     {
       "equipmentType": "loader",
@@ -282,7 +285,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
-      "model": "John Deere 644L"
+      "model": "John Deere 644L",
+      "region": "Northeast",
+      "department": "Operations",
+      "costCenter": "CC-2000"
     },
     {
       "equipmentType": "skidSteer",
@@ -421,7 +427,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "John Deere 320G"
+      "model": "John Deere 320G",
+      "region": "Southeast",
+      "department": "Logistics",
+      "costCenter": "CC-3000"
     },
     {
       "equipmentType": "forklift",
@@ -566,7 +575,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "Toyota 8FGU25"
+      "model": "Toyota 8FGU25",
+      "region": "Midwest",
+      "department": "Maintenance",
+      "costCenter": "CC-1000"
     },
     {
       "equipmentType": "haulTruck",
@@ -711,7 +723,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
-      "model": "Komatsu HM300"
+      "model": "Komatsu HM300",
+      "region": "Northeast",
+      "department": "Operations",
+      "costCenter": "CC-2000"
     },
     {
       "equipmentType": "materialHandler",
@@ -856,7 +871,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "Komatsu PC290LL"
+      "model": "Komatsu PC290LL",
+      "region": "Southeast",
+      "department": "Logistics",
+      "costCenter": "CC-3000"
     },
     {
       "equipmentType": "loader",
@@ -995,7 +1013,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "CAT 950M"
+      "model": "CAT 950M",
+      "region": "Midwest",
+      "department": "Maintenance",
+      "costCenter": "CC-1000"
     },
     {
       "equipmentType": "skidSteer",
@@ -1134,7 +1155,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "CAT 262D3"
+      "model": "CAT 262D3",
+      "region": "Northeast",
+      "department": "Operations",
+      "costCenter": "CC-2000"
     },
     {
       "equipmentType": "forklift",
@@ -1279,7 +1303,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "Crown FC 5252"
+      "model": "Crown FC 5252",
+      "region": "Southeast",
+      "department": "Logistics",
+      "costCenter": "CC-3000"
     },
     {
       "equipmentType": "haulTruck",
@@ -1424,7 +1451,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "CAT 745"
+      "model": "CAT 745",
+      "region": "Midwest",
+      "department": "Maintenance",
+      "costCenter": "CC-1000"
     },
     {
       "equipmentType": "materialHandler",
@@ -1569,7 +1599,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
-      "model": "CAT MH3059"
+      "model": "CAT MH3059",
+      "region": "Northeast",
+      "department": "Operations",
+      "costCenter": "CC-2000"
     },
     {
       "equipmentType": "loader",
@@ -1708,7 +1741,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "Komatsu WA320"
+      "model": "Komatsu WA320",
+      "region": "Southeast",
+      "department": "Logistics",
+      "costCenter": "CC-3000"
     },
     {
       "equipmentType": "skidSteer",
@@ -1847,7 +1883,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
-      "model": "Bobcat S650"
+      "model": "Bobcat S650",
+      "region": "Midwest",
+      "department": "Maintenance",
+      "costCenter": "CC-1000"
     },
     {
       "equipmentType": "forklift",
@@ -1992,7 +2031,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "Hyster H50FT"
+      "model": "Hyster H50FT",
+      "region": "Northeast",
+      "department": "Operations",
+      "costCenter": "CC-2000"
     },
     {
       "equipmentType": "haulTruck",
@@ -2137,7 +2179,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "Volvo A40G"
+      "model": "Volvo A40G",
+      "region": "Southeast",
+      "department": "Logistics",
+      "costCenter": "CC-3000"
     },
     {
       "equipmentType": "materialHandler",
@@ -2282,7 +2327,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "Sennebogen 830 M"
+      "model": "Sennebogen 830 M",
+      "region": "Midwest",
+      "department": "Maintenance",
+      "costCenter": "CC-1000"
     },
     {
       "equipmentType": "loader",
@@ -2421,7 +2469,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record for testing reports and filters.",
-      "model": "John Deere 644L"
+      "model": "John Deere 644L",
+      "region": "Northeast",
+      "department": "Operations",
+      "costCenter": "CC-2000"
     },
     {
       "equipmentType": "skidSteer",
@@ -2560,7 +2611,10 @@
       "attachmentChecklist": [],
       "attachmentLines": [],
       "comments": "Demo record \u2014 flagged item included for testing alerts and reports.",
-      "model": "John Deere 320G"
+      "model": "John Deere 320G",
+      "region": "Southeast",
+      "department": "Logistics",
+      "costCenter": "CC-3000"
     }
   ]
 }

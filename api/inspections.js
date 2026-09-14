@@ -14,7 +14,8 @@ export default async function handler(req, res) {
 
       const result = await sql`
         SELECT id, equipment_type, equipment_label, unit_id, operator,
-               inspection_date, shift, hours, attachment, has_fail, saved_at, created_by, location
+               inspection_date, shift, hours, attachment, has_fail, saved_at, created_by, location,
+               region, department, cost_center
         FROM inspections
         ORDER BY saved_at DESC
         LIMIT 1000;
@@ -62,11 +63,13 @@ export default async function handler(req, res) {
       await sql`
         INSERT INTO inspections (
           id, equipment_type, equipment_label, unit_id, operator,
-          inspection_date, shift, hours, attachment, has_fail, saved_at, created_by, location, data
+          inspection_date, shift, hours, attachment, has_fail, saved_at, created_by, location,
+          region, department, cost_center, data
         ) VALUES (
           ${id}, ${record.equipmentType}, ${record.equipmentLabel || ''}, ${record.unitId}, ${record.operator},
           ${record.date}, ${record.shift || ''}, ${record.hours || ''}, ${record.attachment || 'none'},
-          ${hasFail}, ${savedAt}, ${createdBy}, ${record.location || ''}, ${JSON.stringify(fullRecord)}
+          ${hasFail}, ${savedAt}, ${createdBy}, ${record.location || ''},
+          ${record.region || ''}, ${record.department || ''}, ${record.costCenter || ''}, ${JSON.stringify(fullRecord)}
         )
         ON CONFLICT (id) DO UPDATE SET
           equipment_type = EXCLUDED.equipment_type,
@@ -80,6 +83,9 @@ export default async function handler(req, res) {
           has_fail = EXCLUDED.has_fail,
           saved_at = EXCLUDED.saved_at,
           location = EXCLUDED.location,
+          region = EXCLUDED.region,
+          department = EXCLUDED.department,
+          cost_center = EXCLUDED.cost_center,
           data = EXCLUDED.data;
       `;
 
@@ -94,11 +100,12 @@ export default async function handler(req, res) {
           const woId = 'wo_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
           await sql`
             INSERT INTO work_orders (
-              id, inspection_id, equipment_type, equipment_label, unit_id, location,
+              id, inspection_id, equipment_type, equipment_label, unit_id, location, region, department, cost_center,
               item_group, item_label, item_status, item_notes, photo,
               status, created_at, created_by, updated_at
             ) VALUES (
               ${woId}, ${id}, ${record.equipmentType}, ${record.equipmentLabel || ''}, ${record.unitId}, ${record.location || ''},
+              ${record.region || ''}, ${record.department || ''}, ${record.costCenter || ''},
               ${item.group}, ${item.label}, ${item.status}, ${item.notes || ''}, ${item.photo || null},
               'Open', ${savedAt}, ${user.username}, ${savedAt}
             );
