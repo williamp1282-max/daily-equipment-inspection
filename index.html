@@ -317,6 +317,7 @@
   }
   .tag.fail{background:var(--fail-red);}
   .tag.ok{background:var(--med-green);}
+  .tag.warn{background:var(--warn-amber);}
   .hist-btns{display:flex;gap:8px;flex-wrap:wrap;}
   .hist-btns button{
     font-size:12px;
@@ -446,6 +447,7 @@
     <button id="tabNewBtn" class="active">New Inspection</button>
     <button id="tabHistBtn">Inspection History</button>
     <button id="tabReportsBtn">Reports</button>
+    <button id="tabWOBtn">Work Orders</button>
     <button id="tabUsersBtn" class="hidden">Users</button>
     <button id="tabConfigBtn" class="hidden">Checklist Setup</button>
   </nav>
@@ -686,6 +688,39 @@
         <div id="repByShift"></div>
       </div>
     </div>
+  </section>
+
+  <!-- ============ WORK ORDERS VIEW ============ -->
+  <section id="viewWO" class="hidden">
+    <div class="card">
+      <h2>Work Orders</h2>
+      <p class="section-note">One work order is filed automatically for every item marked <strong>Needs Attention</strong> or <strong>Low</strong> when a new inspection is saved.</p>
+      <div class="grid3">
+        <div class="field">
+          <label for="woFilterStatus">Status</label>
+          <select id="woFilterStatus">
+            <option value="open">Open + In Progress</option>
+            <option value="">All statuses</option>
+            <option value="Open">Open only</option>
+            <option value="In Progress">In Progress only</option>
+            <option value="Closed">Closed only</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="woFilterLocation">Location</label>
+          <select id="woFilterLocation">
+            <option value="">All locations</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="woFilterEquip">Equipment type</label>
+          <select id="woFilterEquip">
+            <option value="">All equipment</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="woList"></div>
   </section>
 
   <!-- ============ USERS VIEW (admin only) ============ -->
@@ -929,7 +964,7 @@
   /* ---------------------------------------------------------
      INIT FORM (once config is loaded)
   --------------------------------------------------------- */
-  var equipSelect, histEquipFilter, repEquipFilter, locationSelects;
+  var equipSelect, histEquipFilter, repEquipFilter, woEquipFilter, locationSelects;
 
   function renderModelOptions(equipKey, preserveValue){
     var wrapper = document.getElementById('fModelField');
@@ -958,7 +993,8 @@
     var selects = [
       document.getElementById('fLocation'),
       document.getElementById('histFilterLocation'),
-      document.getElementById('repFilterLocation')
+      document.getElementById('repFilterLocation'),
+      document.getElementById('woFilterLocation')
     ];
     var locations = APP_CONFIG.locations || [];
     selects.forEach(function(sel){
@@ -979,10 +1015,12 @@
     equipSelect = document.getElementById('fEquipType');
     histEquipFilter = document.getElementById('histFilterEquip');
     repEquipFilter = document.getElementById('repFilterEquip');
+    woEquipFilter = document.getElementById('woFilterEquip');
 
     equipSelect.innerHTML = '<option value="">Select equipment&hellip;</option>';
     histEquipFilter.innerHTML = '<option value="">All equipment</option>';
     repEquipFilter.innerHTML = '<option value="">All equipment</option>';
+    woEquipFilter.innerHTML = '<option value="">All equipment</option>';
     Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
       var opt = document.createElement('option');
       opt.value = key;
@@ -991,6 +1029,7 @@
 
       histEquipFilter.appendChild(opt.cloneNode(true));
       repEquipFilter.appendChild(opt.cloneNode(true));
+      woEquipFilter.appendChild(opt.cloneNode(true));
     });
 
     populateLocationSelects();
@@ -1025,6 +1064,7 @@
     wireTabs();
     wireHistory();
     wireReports();
+    wireWorkOrders();
     wireSaveAndPrint();
     wireUsersAdmin();
     wireNotifyAdmin();
@@ -1386,8 +1426,16 @@
     if(err){ showBanner(err, 'err'); return; }
 
     api('/api/inspections', { method: 'POST', body: JSON.stringify(record) })
-      .then(function(){
-        showBanner((editingId ? 'Inspection updated' : 'Inspection saved') + (hasAnyFail(record) ? ' — flagged items need attention.' : '.'), hasAnyFail(record) ? 'err' : 'ok');
+      .then(function(result){
+        var msg = editingId ? 'Inspection updated' : 'Inspection saved';
+        if(result.workOrdersCreated){
+          msg += ' — ' + result.workOrdersCreated + ' work order' + (result.workOrdersCreated === 1 ? '' : 's') + ' filed for flagged items.';
+        } else if(hasAnyFail(record)){
+          msg += ' — flagged items need attention.';
+        } else {
+          msg += '.';
+        }
+        showBanner(msg, hasAnyFail(record) ? 'err' : 'ok');
         clearForm(false);
       })
       .catch(function(e){
@@ -1554,6 +1602,7 @@
       tabNewBtn: 'viewNew',
       tabHistBtn: 'viewHist',
       tabReportsBtn: 'viewReports',
+      tabWOBtn: 'viewWO',
       tabUsersBtn: 'viewUsers',
       tabConfigBtn: 'viewConfig'
     };
@@ -1565,6 +1614,7 @@
         });
         if(btnId === 'tabHistBtn') loadHistory();
         if(btnId === 'tabReportsBtn') loadReportsData();
+        if(btnId === 'tabWOBtn') loadWorkOrders();
         if(btnId === 'tabUsersBtn'){ loadUsers(); loadNotifyEmails(); }
         if(btnId === 'tabConfigBtn') loadConfigEditor();
       });
@@ -2012,6 +2062,180 @@
   }
 
   /* ---------------------------------------------------------
+     Work Orders
+  --------------------------------------------------------- */
+  var workOrdersCache = [];
+
+  function wireWorkOrders(){
+    document.getElementById('woFilterStatus').addEventListener('change', renderWorkOrders);
+    document.getElementById('woFilterLocation').addEventListener('change', renderWorkOrders);
+    document.getElementById('woFilterEquip').addEventListener('change', renderWorkOrders);
+  }
+
+  function loadWorkOrders(){
+    var list = document.getElementById('woList');
+    list.innerHTML = '<div class="empty-state">Loading work orders&hellip;</div>';
+    api('/api/workorders')
+      .then(function(rows){
+        workOrdersCache = rows;
+        renderWorkOrders();
+      })
+      .catch(function(e){
+        if(handleAuthLoss(e)) return;
+        console.error('Work orders load error', e);
+        list.innerHTML = '<div class="empty-state">Could not load work orders.</div>';
+      });
+  }
+
+  function woStatusTagClass(status){
+    if(status === 'Closed') return 'ok';
+    if(status === 'In Progress') return 'warn';
+    return 'fail';
+  }
+
+  function renderWorkOrders(){
+    var list = document.getElementById('woList');
+    var statusFilter = document.getElementById('woFilterStatus').value;
+    var locationFilter = document.getElementById('woFilterLocation').value;
+    var equipFilter = document.getElementById('woFilterEquip').value;
+
+    var filtered = workOrdersCache.filter(function(wo){
+      if(statusFilter === 'open'){ if(wo.status === 'Closed') return false; }
+      else if(statusFilter){ if(wo.status !== statusFilter) return false; }
+      if(locationFilter && wo.location !== locationFilter) return false;
+      if(equipFilter && wo.equipment_type !== equipFilter) return false;
+      return true;
+    });
+
+    list.innerHTML = '';
+    if(!filtered.length){
+      list.innerHTML = '<div class="empty-state">No work orders match these filters.</div>';
+      return;
+    }
+
+    filtered.forEach(function(wo){
+      list.appendChild(buildWorkOrderCard(wo));
+    });
+  }
+
+  function buildWorkOrderCard(wo){
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.marginBottom = '12px';
+
+    var header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'flex-start';
+    header.style.flexWrap = 'wrap';
+    header.style.gap = '8px';
+    header.innerHTML =
+      '<div>' +
+      '<strong style="color:#213B34;">' + escapeHtml(wo.equipment_label || wo.equipment_type) + ' &mdash; ' + escapeHtml(wo.unit_id) + '</strong>' +
+      (wo.location ? ' <span style="font-size:12.5px; color:#4B5A54;">(' + escapeHtml(wo.location) + ')</span>' : '') +
+      '<div style="font-size:13px; margin-top:2px;">' + escapeHtml(wo.item_label) + ' — ' + escapeHtml(wo.item_status) + '</div>' +
+      (wo.item_notes ? '<div style="font-size:12.5px; color:#4B5A54; margin-top:2px;">' + escapeHtml(wo.item_notes) + '</div>' : '') +
+      '</div>' +
+      '<span class="tag ' + woStatusTagClass(wo.status) + '">' + escapeHtml(wo.status) + '</span>';
+    card.appendChild(header);
+
+    if(wo.photo){
+      var img = document.createElement('img');
+      img.src = wo.photo;
+      img.style.maxWidth = '120px';
+      img.style.borderRadius = '4px';
+      img.style.marginTop = '8px';
+      card.appendChild(img);
+    }
+
+    var meta = document.createElement('div');
+    meta.style.fontSize = '12px';
+    meta.style.color = '#6C7A75';
+    meta.style.marginTop = '8px';
+    meta.textContent = 'Filed ' + (wo.created_at ? new Date(wo.created_at).toLocaleDateString() : '') + (wo.created_by ? ' by ' + wo.created_by : '') +
+      (wo.status === 'Closed' && wo.closed_at ? ' \u00b7 Closed ' + new Date(wo.closed_at).toLocaleDateString() + (wo.closed_by ? ' by ' + wo.closed_by : '') : '');
+    card.appendChild(meta);
+
+    var controls = document.createElement('div');
+    controls.className = 'grid3';
+    controls.style.marginTop = '10px';
+
+    var statusField = document.createElement('div');
+    statusField.className = 'field';
+    statusField.innerHTML = '<label>Status</label>';
+    var statusSelect = document.createElement('select');
+    ['Open','In Progress','Closed'].forEach(function(s){
+      var opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      if(s === wo.status) opt.selected = true;
+      statusSelect.appendChild(opt);
+    });
+    statusField.appendChild(statusSelect);
+    controls.appendChild(statusField);
+
+    var notesField = document.createElement('div');
+    notesField.className = 'field';
+    notesField.style.gridColumn = 'span 2';
+    notesField.innerHTML = '<label>Resolution notes</label>';
+    var notesInput = document.createElement('textarea');
+    notesInput.style.minHeight = '38px';
+    notesInput.value = wo.resolution_notes || '';
+    notesField.appendChild(notesInput);
+    controls.appendChild(notesField);
+
+    card.appendChild(controls);
+
+    var actions = document.createElement('div');
+    actions.className = 'actions-bar';
+    actions.style.marginTop = '10px';
+
+    if(wo.inspection_id){
+      var viewBtn = document.createElement('button');
+      viewBtn.className = 'secondary';
+      viewBtn.type = 'button';
+      viewBtn.textContent = 'View inspection';
+      viewBtn.addEventListener('click', function(){ openDetail(wo.inspection_id); });
+      actions.appendChild(viewBtn);
+    }
+
+    if(CURRENT_USER && CURRENT_USER.role === 'admin'){
+      var delBtn = document.createElement('button');
+      delBtn.className = 'danger';
+      delBtn.type = 'button';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', function(){
+        if(!window.confirm('Delete this work order permanently?')) return;
+        api('/api/workorders?id=' + encodeURIComponent(wo.id), { method: 'DELETE' })
+          .then(function(){ loadWorkOrders(); })
+          .catch(function(e){ if(handleAuthLoss(e)) return; showBanner('Could not delete that work order.', 'err'); });
+      });
+      actions.appendChild(delBtn);
+    }
+
+    var saveBtn = document.createElement('button');
+    saveBtn.className = 'primary';
+    saveBtn.type = 'button';
+    saveBtn.textContent = 'Save';
+    saveBtn.addEventListener('click', function(){
+      saveBtn.disabled = true;
+      api('/api/workorders', { method: 'PUT', body: JSON.stringify({ id: wo.id, status: statusSelect.value, resolutionNotes: notesInput.value }) })
+        .then(function(){
+          showBanner('Work order updated.', 'ok');
+          loadWorkOrders();
+        })
+        .catch(function(e){
+          saveBtn.disabled = false;
+          if(handleAuthLoss(e)) return;
+          showBanner(e.message || 'Could not update that work order.', 'err');
+        });
+    });
+    actions.appendChild(saveBtn);
+
+    card.appendChild(actions);
+    return card;
+  }
+
+  /* ---------------------------------------------------------
      Users admin
   --------------------------------------------------------- */
   function wireUsersAdmin(){
@@ -2162,6 +2386,7 @@
           equipSelect.innerHTML = '<option value="">Select equipment&hellip;</option>';
           histEquipFilter.innerHTML = '<option value="">All equipment</option>';
           repEquipFilter.innerHTML = '<option value="">All equipment</option>';
+          woEquipFilter.innerHTML = '<option value="">All equipment</option>';
           Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
             var opt = document.createElement('option');
             opt.value = key;
@@ -2169,6 +2394,7 @@
             equipSelect.appendChild(opt);
             histEquipFilter.appendChild(opt.cloneNode(true));
             repEquipFilter.appendChild(opt.cloneNode(true));
+            woEquipFilter.appendChild(opt.cloneNode(true));
           });
           populateLocationSelects();
           var attachSelect = document.getElementById('fAttachment');

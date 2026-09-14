@@ -1,4 +1,4 @@
-import { sql, ensureTable, computeHasFail } from '../lib/db.js';
+import { sql, ensureTable, computeHasFail, collectFlaggedItems } from '../lib/db.js';
 import { requireAuth, requireAdmin } from '../lib/auth.js';
 import { sendFailureAlert } from '../lib/email.js';
 
@@ -83,7 +83,31 @@ export default async function handler(req, res) {
           data = EXCLUDED.data;
       `;
 
-      res.status(200).json({ ok: true, id, hasFail, savedAt });
+      // Auto-file one work order per flagged item — but only when this is a
+      // brand-new inspection, never on an admin's later edit of an existing
+      // one, so re-saving an already-flagged inspection doesn't spawn
+      // duplicate work orders for the same issue.
+      let workOrdersCreated = 0;
+      if (hasFail && !existing) {
+        const flaggedItems = collectFlaggedItems(record);
+        for (const item of flaggedItems) {
+          const woId = 'wo_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+          await sql`
+            INSERT INTO work_orders (
+              id, inspection_id, equipment_type, equipment_label, unit_id, location,
+              item_group, item_label, item_status, item_notes, photo,
+              status, created_at, created_by, updated_at
+            ) VALUES (
+              ${woId}, ${id}, ${record.equipmentType}, ${record.equipmentLabel || ''}, ${record.unitId}, ${record.location || ''},
+              ${item.group}, ${item.label}, ${item.status}, ${item.notes || ''}, ${item.photo || null},
+              'Open', ${savedAt}, ${user.username}, ${savedAt}
+            );
+          `;
+          workOrdersCreated++;
+        }
+      }
+
+      res.status(200).json({ ok: true, id, hasFail, savedAt, workOrdersCreated });
 
       // Fire the "needs attention" alert after responding to the client —
       // a slow or failed email should never hold up or break the save.
