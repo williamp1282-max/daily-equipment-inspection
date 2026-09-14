@@ -853,6 +853,7 @@
       </div>
       <div class="actions-bar" style="justify-content:flex-start; margin-bottom:12px;">
         <button class="secondary" id="acPrintInventoryBtn" type="button">Print inventory</button>
+        <button class="secondary" id="acPopulateFromInspectionsBtn" type="button">Populate from existing inspections</button>
       </div>
 
       <div id="acAssets"></div>
@@ -3014,6 +3015,20 @@
       document.getElementById(id).addEventListener('change', renderFilteredAssets);
     });
     document.getElementById('acPrintInventoryBtn').addEventListener('click', printAssetInventory);
+    document.getElementById('acPopulateFromInspectionsBtn').addEventListener('click', function(){
+      if(!window.confirm('Scan all logged inspections and register any unit numbers not already in the Assets list? This never overwrites units you\u2019ve already registered.')) return;
+      clearBannerIn('acBanner');
+      api('/api/assets', { method: 'POST', body: JSON.stringify({ action: 'populateFromInspections' }) })
+        .then(function(result){
+          showBannerIn('acBanner', 'Scanned ' + result.scanned + ' unique unit(s) from inspection history \u2014 added ' + result.added + ' new registry entr' + (result.added === 1 ? 'y' : 'ies') + '.', 'ok');
+          loadAssetsForAdminCenter();
+          populateAssetDatalist();
+        })
+        .catch(function(e){
+          if(handleAuthLoss(e)) return;
+          showBannerIn('acBanner', e.message || 'Could not populate from inspections.', 'err');
+        });
+    });
     document.getElementById('acSaveAssetBtn').addEventListener('click', function(){
       clearBannerIn('acBanner');
       var unitId = document.getElementById('acAssetUnitId').value.trim();
