@@ -24,6 +24,63 @@ export default async function handler(req, res) {
       return;
     }
 
+    if (req.method === 'POST') {
+      const user = requireAuth(req, res);
+      if (!user) return;
+
+      const { inspectionId, group, index } = req.body || {};
+      const VALID_GROUPS = ['fluids', 'checklist', 'attachmentChecklist', 'attachmentLines'];
+      if (!inspectionId || !VALID_GROUPS.includes(group) || typeof index !== 'number') {
+        res.status(400).json({ error: 'inspectionId, a valid group, and an item index are required.' });
+        return;
+      }
+
+      const inspResult = await sql`
+        SELECT data, equipment_type, equipment_label, unit_id, location, region, department, cost_center
+        FROM inspections WHERE id = ${inspectionId} LIMIT 1;
+      `;
+      if (inspResult.rows.length === 0) {
+        res.status(404).json({ error: 'That inspection no longer exists.' });
+        return;
+      }
+      const insp = inspResult.rows[0];
+      const items = (insp.data && insp.data[group]) || [];
+      const item = items[index];
+      if (!item) {
+        res.status(404).json({ error: 'That checklist item could not be found on this inspection.' });
+        return;
+      }
+
+      // Avoid filing a second open work order for the exact same item on the
+      // exact same inspection if one already exists and isn't closed yet.
+      const existing = await sql`
+        SELECT id FROM work_orders
+        WHERE inspection_id = ${inspectionId} AND item_group = ${group} AND item_label = ${item.label} AND status != 'Closed'
+        LIMIT 1;
+      `;
+      if (existing.rows.length) {
+        res.status(200).json({ ok: true, created: false, id: existing.rows[0].id });
+        return;
+      }
+
+      const woId = 'wo_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+      const now = new Date().toISOString();
+      await sql`
+        INSERT INTO work_orders (
+          id, inspection_id, equipment_type, equipment_label, unit_id, location, region, department, cost_center,
+          item_group, item_label, item_status, item_notes, photo,
+          status, created_at, created_by, updated_at
+        ) VALUES (
+          ${woId}, ${inspectionId}, ${insp.equipment_type}, ${insp.equipment_label}, ${insp.unit_id}, ${insp.location},
+          ${insp.region}, ${insp.department}, ${insp.cost_center},
+          ${group}, ${item.label}, ${item.status || 'N/A'}, ${item.notes || ''}, ${item.photo || null},
+          'Open', ${now}, ${user.username}, ${now}
+        );
+      `;
+      res.status(200).json({ ok: true, created: true, id: woId });
+      return;
+    }
+
     if (req.method === 'PUT') {
       const user = requireAuth(req, res);
       if (!user) return;
@@ -90,7 +147,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    res.setHeader('Allow', 'GET, PUT, DELETE');
+    res.setHeader('Allow', 'GET, POST, PUT, DELETE');
     res.status(405).json({ error: 'Method not allowed' });
   } catch (err) {
     console.error('workorders handler error', err);

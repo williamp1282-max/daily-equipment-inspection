@@ -1869,10 +1869,14 @@
         var html = '<h2>' + escapeHtml(record.equipmentLabel) + (record.model ? ' (' + escapeHtml(record.model) + ')' : '') + ' &mdash; ' + escapeHtml(record.unitId) + '</h2>';
         html += '<p style="font-size:13px; color:#4B5A54;">' + escapeHtml(record.date) + ' &middot; ' + escapeHtml(record.shift) + ' shift &middot; Operator: ' + escapeHtml(record.operator) + ' &middot; Hours: ' + escapeHtml(record.hours || '—') + (record.location ? ' &middot; ' + escapeHtml(record.location) : '') + (record.region ? ' &middot; ' + escapeHtml(record.region) : '') + (record.department ? ' &middot; ' + escapeHtml(record.department) : '') + (record.costCenter ? ' &middot; ' + escapeHtml(record.costCenter) : '') + (record.createdBy ? ' &middot; Logged by ' + escapeHtml(record.createdBy) : '') + '</p>';
 
-        function renderDetailGroup(title, items){
+        function renderDetailGroup(title, items, groupKey){
           var h = '<h3 style="color:#213B34;">' + title + '</h3>';
-          items.forEach(function(it){
-            h += '<div class="detail-item"><strong>' + escapeHtml(it.label) + '</strong> — ' + (it.status || 'Not checked');
+          items.forEach(function(it, idx){
+            h += '<div class="detail-item" data-wo-group="' + groupKey + '" data-wo-index="' + idx + '">' +
+              '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">' +
+              '<div><strong>' + escapeHtml(it.label) + '</strong> — ' + (escapeHtml(it.status) || 'Not checked') + '</div>' +
+              '<button type="button" class="wo-create-btn" style="font-size:11.5px; padding:4px 9px; border-radius:12px; border:1px solid #006325; background:#fff; color:#006325; cursor:pointer; font-family:inherit;">+ Work order</button>' +
+              '</div>';
             if(it.notes) h += '<div>' + escapeHtml(it.notes) + '</div>';
             if(it.photo) h += '<img src="' + it.photo + '">';
             h += '</div>';
@@ -1880,18 +1884,41 @@
           return h;
         }
 
-        html += renderDetailGroup('Fluid Checks', record.fluids);
-        html += renderDetailGroup('Inspection Checklist', record.checklist);
+        html += renderDetailGroup('Fluid Checks', record.fluids, 'fluids');
+        html += renderDetailGroup('Inspection Checklist', record.checklist, 'checklist');
         if(record.attachmentChecklist && record.attachmentChecklist.length){
-          html += renderDetailGroup((APP_CONFIG.attachmentLabels[record.attachment] || 'Attachment') + ' Checklist', record.attachmentChecklist);
+          html += renderDetailGroup((APP_CONFIG.attachmentLabels[record.attachment] || 'Attachment') + ' Checklist', record.attachmentChecklist, 'attachmentChecklist');
         }
         if(record.attachmentLines && record.attachmentLines.length){
-          html += renderDetailGroup((APP_CONFIG.attachmentLabels[record.attachment] || 'Attachment') + ' Line Checks', record.attachmentLines);
+          html += renderDetailGroup((APP_CONFIG.attachmentLabels[record.attachment] || 'Attachment') + ' Line Checks', record.attachmentLines, 'attachmentLines');
         }
         html += '<h3 style="color:#213B34;">Comments</h3><p>' + (escapeHtml(record.comments) || '<em>None</em>') + '</p>';
 
         content.innerHTML = html;
         document.getElementById('detailModal').classList.remove('hidden');
+
+        content.querySelectorAll('.wo-create-btn').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            var itemEl = btn.closest('.detail-item');
+            var group = itemEl.getAttribute('data-wo-group');
+            var index = parseInt(itemEl.getAttribute('data-wo-index'), 10);
+            btn.disabled = true;
+            btn.textContent = 'Filing\u2026';
+            api('/api/workorders', { method: 'POST', body: JSON.stringify({ inspectionId: record.id, group: group, index: index }) })
+              .then(function(res){
+                btn.textContent = res.created ? 'Work order filed' : 'Already open';
+                btn.style.background = '#D9E8E2';
+                btn.style.color = '#213B34';
+                btn.style.cursor = 'default';
+              })
+              .catch(function(e){
+                btn.disabled = false;
+                btn.textContent = '+ Work order';
+                if(handleAuthLoss(e)) return;
+                showBanner(e.message || 'Could not create a work order for that item.', 'err');
+              });
+          });
+        });
       })
       .catch(function(e){
         if(handleAuthLoss(e)) return;
