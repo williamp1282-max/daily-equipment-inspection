@@ -16,7 +16,12 @@ export default async function handler(req, res) {
         res.status(200).json(DEFAULT_CONFIG);
         return;
       }
-      res.status(200).json(result.rows[0].value);
+      // Backfill any top-level keys added to DEFAULT_CONFIG since this admin
+      // last saved a custom config (e.g. regions/departments/costCenters were
+      // added after some configs were already saved) — otherwise a later
+      // save of that same config trips the "missing required keys" check.
+      const merged = { ...DEFAULT_CONFIG, ...result.rows[0].value };
+      res.status(200).json(merged);
       return;
     }
 
