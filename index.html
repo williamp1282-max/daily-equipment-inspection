@@ -1894,6 +1894,10 @@
         }
         html += '<h3 style="color:#213B34;">Comments</h3><p>' + (escapeHtml(record.comments) || '<em>None</em>') + '</p>';
 
+        html += '<div style="border-top:1px solid #D9E8E2; margin-top:16px; padding-top:14px; text-align:right;">' +
+          '<button type="button" id="woGeneralBtn" class="secondary" style="padding:9px 16px; font-size:13px;">+ Create work order for this inspection</button>' +
+          '</div>';
+
         content.innerHTML = html;
         document.getElementById('detailModal').classList.remove('hidden');
 
@@ -1918,6 +1922,25 @@
                 showBanner(e.message || 'Could not create a work order for that item.', 'err');
               });
           });
+        });
+
+        var generalBtn = document.getElementById('woGeneralBtn');
+        generalBtn.addEventListener('click', function(){
+          var notes = window.prompt('Optional note for this work order (what needs follow-up?):', '');
+          if(notes === null) return; // cancelled
+          generalBtn.disabled = true;
+          generalBtn.textContent = 'Filing\u2026';
+          api('/api/workorders', { method: 'POST', body: JSON.stringify({ inspectionId: record.id, notes: notes }) })
+            .then(function(res){
+              generalBtn.textContent = res.created ? 'Work order filed' : 'Already open';
+              generalBtn.disabled = true;
+            })
+            .catch(function(e){
+              generalBtn.disabled = false;
+              generalBtn.textContent = '+ Create work order for this inspection';
+              if(handleAuthLoss(e)) return;
+              showBanner(e.message || 'Could not create a work order for this inspection.', 'err');
+            });
         });
       })
       .catch(function(e){

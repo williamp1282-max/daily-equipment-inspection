@@ -28,10 +28,16 @@ export default async function handler(req, res) {
       const user = requireAuth(req, res);
       if (!user) return;
 
-      const { inspectionId, group, index } = req.body || {};
+      const { inspectionId, group, index, notes } = req.body || {};
       const VALID_GROUPS = ['fluids', 'checklist', 'attachmentChecklist', 'attachmentLines'];
-      if (!inspectionId || !VALID_GROUPS.includes(group) || typeof index !== 'number') {
-        res.status(400).json({ error: 'inspectionId, a valid group, and an item index are required.' });
+      const isItemMode = group !== undefined && group !== null;
+
+      if (!inspectionId) {
+        res.status(400).json({ error: 'inspectionId is required.' });
+        return;
+      }
+      if (isItemMode && (!VALID_GROUPS.includes(group) || typeof index !== 'number')) {
+        res.status(400).json({ error: 'A valid group and an item index are required when filing from a specific check.' });
         return;
       }
 
@@ -44,18 +50,37 @@ export default async function handler(req, res) {
         return;
       }
       const insp = inspResult.rows[0];
-      const items = (insp.data && insp.data[group]) || [];
-      const item = items[index];
-      if (!item) {
-        res.status(404).json({ error: 'That checklist item could not be found on this inspection.' });
-        return;
+
+      // Two modes: filing from one specific checklist/fluid item (isItemMode),
+      // or a general work order for the inspection as a whole (no group/index
+      // given — used by the button at the bottom of the inspection detail).
+      let itemGroup, itemLabel, itemStatus, itemNotes, itemPhoto;
+      if (isItemMode) {
+        const items = (insp.data && insp.data[group]) || [];
+        const item = items[index];
+        if (!item) {
+          res.status(404).json({ error: 'That checklist item could not be found on this inspection.' });
+          return;
+        }
+        itemGroup = group;
+        itemLabel = item.label;
+        itemStatus = item.status || 'N/A';
+        itemNotes = item.notes || '';
+        itemPhoto = item.photo || null;
+      } else {
+        itemGroup = 'general';
+        itemLabel = 'General follow-up';
+        itemStatus = '';
+        itemNotes = (notes || '').trim();
+        itemPhoto = null;
       }
 
-      // Avoid filing a second open work order for the exact same item on the
-      // exact same inspection if one already exists and isn't closed yet.
+      // Avoid filing a second open work order for the exact same item (or, in
+      // general mode, a second general work order) on the exact same
+      // inspection if one already exists and isn't closed yet.
       const existing = await sql`
         SELECT id FROM work_orders
-        WHERE inspection_id = ${inspectionId} AND item_group = ${group} AND item_label = ${item.label} AND status != 'Closed'
+        WHERE inspection_id = ${inspectionId} AND item_group = ${itemGroup} AND item_label = ${itemLabel} AND status != 'Closed'
         LIMIT 1;
       `;
       if (existing.rows.length) {
@@ -73,7 +98,7 @@ export default async function handler(req, res) {
         ) VALUES (
           ${woId}, ${inspectionId}, ${insp.equipment_type}, ${insp.equipment_label}, ${insp.unit_id}, ${insp.location},
           ${insp.region}, ${insp.department}, ${insp.cost_center},
-          ${group}, ${item.label}, ${item.status || 'N/A'}, ${item.notes || ''}, ${item.photo || null},
+          ${itemGroup}, ${itemLabel}, ${itemStatus}, ${itemNotes}, ${itemPhoto},
           'Open', ${now}, ${user.username}, ${now}
         );
       `;
