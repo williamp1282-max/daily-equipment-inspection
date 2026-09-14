@@ -449,6 +449,7 @@
     <button id="tabReportsBtn">Reports</button>
     <button id="tabWOBtn">Work Orders</button>
     <button id="tabUsersBtn" class="hidden">Users</button>
+    <button id="tabAdminCenterBtn" class="hidden">Admin Center</button>
     <button id="tabConfigBtn" class="hidden">Checklist Setup</button>
   </nav>
   <div class="user-bar">
@@ -485,7 +486,8 @@
         </div>
         <div class="field">
           <label for="fUnitId">Unit / Asset Number</label>
-          <input type="text" id="fUnitId" placeholder="e.g. MH-104">
+          <input type="text" id="fUnitId" placeholder="e.g. MH-104" list="unitIdOptions">
+          <datalist id="unitIdOptions"></datalist>
         </div>
         <div class="field">
           <label for="fLocation">Location</label>
@@ -773,6 +775,97 @@
     <div id="woList"></div>
   </section>
 
+  <!-- ============ ADMIN CENTER (admin only) ============ -->
+  <section id="viewAdminCenter" class="hidden">
+    <div id="acBanner"></div>
+
+    <div class="grid3">
+      <div class="card">
+        <h2>Departments</h2>
+        <div id="acDepartments" class="user-row" style="display:block;"></div>
+        <div class="actions-bar" style="justify-content:flex-start; margin-top:10px;">
+          <input type="text" id="acNewDepartment" placeholder="New department" style="flex:1;">
+          <button class="secondary" id="acAddDepartmentBtn" type="button">Add</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Regions</h2>
+        <div id="acRegions" class="user-row" style="display:block;"></div>
+        <div class="actions-bar" style="justify-content:flex-start; margin-top:10px;">
+          <input type="text" id="acNewRegion" placeholder="New region" style="flex:1;">
+          <button class="secondary" id="acAddRegionBtn" type="button">Add</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Locations</h2>
+        <div id="acLocations" class="user-row" style="display:block;"></div>
+        <div class="actions-bar" style="justify-content:flex-start; margin-top:10px;">
+          <input type="text" id="acNewLocation" placeholder="New location" style="flex:1;">
+          <button class="secondary" id="acAddLocationBtn" type="button">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Equipment Types</h2>
+      <p class="section-note">Each type's checklist items appear on every inspection for that equipment. Models appear in the Make/Model dropdown once a type is selected.</p>
+      <div id="acEquipmentTypes"></div>
+      <div class="grid3" style="margin-top:14px; border-top:1px solid var(--pale-green); padding-top:14px;">
+        <div class="field">
+          <label for="acNewEquipKey">Internal key (no spaces)</label>
+          <input type="text" id="acNewEquipKey" placeholder="e.g. excavator">
+        </div>
+        <div class="field">
+          <label for="acNewEquipLabel">Display label</label>
+          <input type="text" id="acNewEquipLabel" placeholder="e.g. Excavator">
+        </div>
+      </div>
+      <div class="actions-bar" style="justify-content:flex-start;">
+        <button class="secondary" id="acAddEquipTypeBtn" type="button">Add equipment type</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Assets / Units</h2>
+      <p class="section-note">Registering a unit here lets it autocomplete on the New Inspection form, and auto-fills equipment type, model, location, region, department, and cost center when its Unit/Asset Number is typed.</p>
+      <div id="acAssets"></div>
+      <h3 style="font-size:14px; color:var(--dark-green); margin:16px 0 8px; border-top:1px solid var(--pale-green); padding-top:14px;">Add / update a unit</h3>
+      <div class="grid3">
+        <div class="field">
+          <label for="acAssetUnitId">Unit / Asset Number</label>
+          <input type="text" id="acAssetUnitId" placeholder="e.g. MH-104">
+        </div>
+        <div class="field">
+          <label for="acAssetEquipType">Equipment Type</label>
+          <select id="acAssetEquipType"><option value="">Select&hellip;</option></select>
+        </div>
+        <div class="field">
+          <label for="acAssetModel">Make / Model</label>
+          <select id="acAssetModel"><option value="">Select&hellip;</option></select>
+        </div>
+        <div class="field">
+          <label for="acAssetLocation">Location</label>
+          <select id="acAssetLocation"><option value="">Select&hellip;</option></select>
+        </div>
+        <div class="field">
+          <label for="acAssetRegion">Region</label>
+          <select id="acAssetRegion"><option value="">Select&hellip;</option></select>
+        </div>
+        <div class="field">
+          <label for="acAssetDepartment">Department</label>
+          <select id="acAssetDepartment"><option value="">Select&hellip;</option></select>
+        </div>
+        <div class="field">
+          <label for="acAssetCostCenter">Cost Center</label>
+          <select id="acAssetCostCenter"><option value="">Select&hellip;</option></select>
+        </div>
+      </div>
+      <div class="actions-bar" style="justify-content:flex-start;">
+        <button class="primary" id="acSaveAssetBtn" type="button">Save unit</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ USERS VIEW (admin only) ============ -->
   <section id="viewUsers" class="hidden">
     <div class="card">
@@ -978,6 +1071,7 @@
 
     if(user.role === 'admin'){
       document.getElementById('tabUsersBtn').classList.remove('hidden');
+      document.getElementById('tabAdminCenterBtn').classList.remove('hidden');
       document.getElementById('tabConfigBtn').classList.remove('hidden');
       document.getElementById('importCard').classList.remove('hidden');
     }
@@ -1061,6 +1155,46 @@
     });
   }
 
+  function refreshEquipmentTypeSelects(){
+    var current = equipSelect.value;
+    equipSelect.innerHTML = '<option value="">Select equipment&hellip;</option>';
+    histEquipFilter.innerHTML = '<option value="">All equipment</option>';
+    repEquipFilter.innerHTML = '<option value="">All equipment</option>';
+    woEquipFilter.innerHTML = '<option value="">All equipment</option>';
+    Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
+      var opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = APP_CONFIG.equipmentTypes[key].label;
+      equipSelect.appendChild(opt);
+
+      histEquipFilter.appendChild(opt.cloneNode(true));
+      repEquipFilter.appendChild(opt.cloneNode(true));
+      woEquipFilter.appendChild(opt.cloneNode(true));
+    });
+    if(current && APP_CONFIG.equipmentTypes[current]) equipSelect.value = current;
+  }
+
+  function refreshAllConfigDrivenUI(){
+    refreshEquipmentTypeSelects();
+    populateLocationSelects();
+    populateOrgFieldSelects();
+    populateAssetDatalist();
+    var attachSelect = document.getElementById('fAttachment');
+    var currentAttach = attachSelect.value;
+    attachSelect.innerHTML = '<option value="none">None</option>';
+    Object.keys(APP_CONFIG.attachmentChecks).forEach(function(key){
+      var opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = APP_CONFIG.attachmentLabels[key] || key;
+      attachSelect.appendChild(opt);
+    });
+    if(currentAttach) attachSelect.value = currentAttach;
+    renderFluidItems();
+    renderChecklist(equipSelect.value);
+    renderModelOptions(equipSelect.value);
+    renderAttachment(attachSelect.value, false);
+  }
+
   function populateOrgFieldSelects(){
     var groups = [
       { configKey: 'regions', formId: 'fRegion', formLabel: 'Select region&hellip;', filterLabel: 'All regions', filterIds: ['histFilterRegion','repFilterRegion'] },
@@ -1093,20 +1227,7 @@
     repEquipFilter = document.getElementById('repFilterEquip');
     woEquipFilter = document.getElementById('woFilterEquip');
 
-    equipSelect.innerHTML = '<option value="">Select equipment&hellip;</option>';
-    histEquipFilter.innerHTML = '<option value="">All equipment</option>';
-    repEquipFilter.innerHTML = '<option value="">All equipment</option>';
-    woEquipFilter.innerHTML = '<option value="">All equipment</option>';
-    Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
-      var opt = document.createElement('option');
-      opt.value = key;
-      opt.textContent = APP_CONFIG.equipmentTypes[key].label;
-      equipSelect.appendChild(opt);
-
-      histEquipFilter.appendChild(opt.cloneNode(true));
-      repEquipFilter.appendChild(opt.cloneNode(true));
-      woEquipFilter.appendChild(opt.cloneNode(true));
-    });
+    refreshEquipmentTypeSelects();
 
     populateLocationSelects();
     populateOrgFieldSelects();
@@ -1121,6 +1242,9 @@
     });
 
     document.getElementById('fDate').valueAsDate = new Date();
+
+    populateAssetDatalist();
+    wireUnitIdAutofill();
 
     equipSelect.addEventListener('change', function(){
       renderChecklist(equipSelect.value);
@@ -1142,6 +1266,7 @@
     wireHistory();
     wireReports();
     wireWorkOrders();
+    wireAdminCenter();
     wireSaveAndPrint();
     wireUsersAdmin();
     wireNotifyAdmin();
@@ -1693,6 +1818,7 @@
       tabReportsBtn: 'viewReports',
       tabWOBtn: 'viewWO',
       tabUsersBtn: 'viewUsers',
+      tabAdminCenterBtn: 'viewAdminCenter',
       tabConfigBtn: 'viewConfig'
     };
     Object.keys(tabs).forEach(function(btnId){
@@ -1705,6 +1831,7 @@
         if(btnId === 'tabReportsBtn') loadReportsData();
         if(btnId === 'tabWOBtn') loadWorkOrders();
         if(btnId === 'tabUsersBtn'){ loadUsers(); loadNotifyEmails(); }
+        if(btnId === 'tabAdminCenterBtn') renderAdminCenter();
         if(btnId === 'tabConfigBtn') loadConfigEditor();
       });
     });
@@ -2403,6 +2530,401 @@
   }
 
   /* ---------------------------------------------------------
+     Asset registry — autocomplete + auto-fill on the New Inspection form
+  --------------------------------------------------------- */
+  var assetsCache = [];
+
+  function populateAssetDatalist(){
+    return api('/api/assets')
+      .then(function(rows){
+        assetsCache = rows;
+        var datalist = document.getElementById('unitIdOptions');
+        datalist.innerHTML = '';
+        rows.forEach(function(a){
+          var opt = document.createElement('option');
+          opt.value = a.unit_id;
+          datalist.appendChild(opt);
+        });
+        return rows;
+      })
+      .catch(function(e){
+        if(handleAuthLoss(e)) return;
+        console.error('Asset list load error', e);
+      });
+  }
+
+  function wireUnitIdAutofill(){
+    var unitInput = document.getElementById('fUnitId');
+    function tryAutofill(){
+      var match = assetsCache.find(function(a){ return a.unit_id === unitInput.value.trim(); });
+      if(!match) return;
+      if(match.equipment_type && APP_CONFIG.equipmentTypes[match.equipment_type]){
+        equipSelect.value = match.equipment_type;
+        renderChecklist(match.equipment_type);
+        renderModelOptions(match.equipment_type, match.model || '');
+      }
+      if(match.location) document.getElementById('fLocation').value = match.location;
+      if(match.region) document.getElementById('fRegion').value = match.region;
+      if(match.department) document.getElementById('fDepartment').value = match.department;
+      if(match.cost_center) document.getElementById('fCostCenter').value = match.cost_center;
+    }
+    unitInput.addEventListener('change', tryAutofill);
+  }
+
+  /* ---------------------------------------------------------
+     Admin Center — structured data entry for departments, regions,
+     locations, equipment types, and the asset/unit registry
+  --------------------------------------------------------- */
+  function saveConfigMutation(mutatorFn){
+    var updated = JSON.parse(JSON.stringify(APP_CONFIG));
+    mutatorFn(updated);
+    return api('/api/config', { method: 'PUT', body: JSON.stringify(updated) })
+      .then(function(){
+        APP_CONFIG = updated;
+        refreshAllConfigDrivenUI();
+        return APP_CONFIG;
+      });
+  }
+
+  function renderSimpleListSection(containerId, configKey, addBtnId, addInputId, nounSingular){
+    var container = document.getElementById(containerId);
+    var values = APP_CONFIG[configKey] || [];
+    container.innerHTML = '';
+    if(!values.length){
+      container.innerHTML = '<div class="empty-state" style="padding:14px;">No ' + nounSingular + 's yet.</div>';
+    }
+    values.forEach(function(v){
+      var row = document.createElement('div');
+      row.className = 'user-row';
+      var label = document.createElement('div');
+      label.textContent = v;
+      row.appendChild(label);
+      var delBtn = document.createElement('button');
+      delBtn.className = 'danger';
+      delBtn.type = 'button';
+      delBtn.textContent = 'Remove';
+      delBtn.addEventListener('click', function(){
+        if(!window.confirm('Remove "' + v + '"? Existing inspections that used it keep their value \u2014 this only removes it from future dropdowns.')) return;
+        saveConfigMutation(function(cfg){
+          cfg[configKey] = cfg[configKey].filter(function(x){ return x !== v; });
+        }).then(function(){
+          showBannerIn('acBanner', 'Removed.', 'ok');
+          renderAdminCenter();
+        }).catch(function(e){
+          if(handleAuthLoss(e)) return;
+          showBannerIn('acBanner', e.message || 'Could not remove that.', 'err');
+        });
+      });
+      row.appendChild(delBtn);
+      container.appendChild(row);
+    });
+
+    var addBtn = document.getElementById(addBtnId);
+    var addInput = document.getElementById(addInputId);
+    addBtn.onclick = function(){
+      var val = addInput.value.trim();
+      if(!val){ showBannerIn('acBanner', 'Enter a value first.', 'err'); return; }
+      if((APP_CONFIG[configKey] || []).indexOf(val) !== -1){ showBannerIn('acBanner', 'That already exists.', 'err'); return; }
+      saveConfigMutation(function(cfg){
+        cfg[configKey] = (cfg[configKey] || []).concat([val]);
+      }).then(function(){
+        addInput.value = '';
+        showBannerIn('acBanner', 'Added.', 'ok');
+        renderAdminCenter();
+      }).catch(function(e){
+        if(handleAuthLoss(e)) return;
+        showBannerIn('acBanner', e.message || 'Could not add that.', 'err');
+      });
+    };
+  }
+
+  function renderEquipmentTypesSection(){
+    var container = document.getElementById('acEquipmentTypes');
+    container.innerHTML = '';
+    var keys = Object.keys(APP_CONFIG.equipmentTypes);
+    if(!keys.length){ container.innerHTML = '<div class="empty-state">No equipment types yet.</div>'; }
+
+    keys.forEach(function(key){
+      var type = APP_CONFIG.equipmentTypes[key];
+      var card = document.createElement('div');
+      card.className = 'item-row';
+
+      var top = document.createElement('div');
+      top.className = 'item-top';
+      var name = document.createElement('div');
+      name.className = 'item-name';
+      name.textContent = type.label + ' (' + key + ')';
+      top.appendChild(name);
+      var delTypeBtn = document.createElement('button');
+      delTypeBtn.className = 'danger';
+      delTypeBtn.type = 'button';
+      delTypeBtn.textContent = 'Delete type';
+      delTypeBtn.addEventListener('click', function(){
+        if(!window.confirm('Delete equipment type "' + type.label + '"? Past inspections keep their data \u2014 this only removes it from future use.')) return;
+        saveConfigMutation(function(cfg){ delete cfg.equipmentTypes[key]; })
+          .then(function(){ showBannerIn('acBanner', 'Deleted.', 'ok'); renderAdminCenter(); })
+          .catch(function(e){ if(handleAuthLoss(e)) return; showBannerIn('acBanner', e.message || 'Could not delete.', 'err'); });
+      });
+      top.appendChild(delTypeBtn);
+      card.appendChild(top);
+
+      var detail = document.createElement('div');
+      detail.style.marginTop = '10px';
+      detail.style.display = 'grid';
+      detail.style.gridTemplateColumns = '1fr 1fr';
+      detail.style.gap = '14px';
+
+      function buildSubList(title, arrKey, placeholder){
+        var wrap = document.createElement('div');
+        var h = document.createElement('div');
+        h.style.fontWeight = 'bold';
+        h.style.fontSize = '12.5px';
+        h.style.color = 'var(--dark-green)';
+        h.style.marginBottom = '4px';
+        h.textContent = title;
+        wrap.appendChild(h);
+
+        (type[arrKey] || []).forEach(function(val, idx){
+          var row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.justifyContent = 'space-between';
+          row.style.alignItems = 'center';
+          row.style.fontSize = '13px';
+          row.style.padding = '4px 0';
+          var span = document.createElement('span');
+          span.textContent = val;
+          row.appendChild(span);
+          var rm = document.createElement('button');
+          rm.className = 'ghost';
+          rm.type = 'button';
+          rm.textContent = 'Remove';
+          rm.style.padding = '0 4px';
+          rm.addEventListener('click', function(){
+            saveConfigMutation(function(cfg){
+              cfg.equipmentTypes[key][arrKey] = cfg.equipmentTypes[key][arrKey].filter(function(_, i){ return i !== idx; });
+            }).then(function(){ renderAdminCenter(); })
+              .catch(function(e){ if(handleAuthLoss(e)) return; showBannerIn('acBanner', e.message || 'Could not remove.', 'err'); });
+          });
+          row.appendChild(rm);
+          wrap.appendChild(row);
+        });
+
+        var addRow = document.createElement('div');
+        addRow.style.display = 'flex';
+        addRow.style.gap = '6px';
+        addRow.style.marginTop = '6px';
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = placeholder;
+        input.style.flex = '1';
+        var addBtn = document.createElement('button');
+        addBtn.className = 'secondary';
+        addBtn.type = 'button';
+        addBtn.textContent = 'Add';
+        addBtn.style.padding = '6px 12px';
+        addBtn.style.fontSize = '12px';
+        addBtn.addEventListener('click', function(){
+          var val = input.value.trim();
+          if(!val) return;
+          saveConfigMutation(function(cfg){
+            if(!cfg.equipmentTypes[key][arrKey]) cfg.equipmentTypes[key][arrKey] = [];
+            cfg.equipmentTypes[key][arrKey].push(val);
+          }).then(function(){ renderAdminCenter(); })
+            .catch(function(e){ if(handleAuthLoss(e)) return; showBannerIn('acBanner', e.message || 'Could not add.', 'err'); });
+        });
+        addRow.appendChild(input);
+        addRow.appendChild(addBtn);
+        wrap.appendChild(addRow);
+        return wrap;
+      }
+
+      detail.appendChild(buildSubList('Checklist Items', 'items', 'New checklist item'));
+      detail.appendChild(buildSubList('Make / Model Options', 'models', 'New model'));
+      card.appendChild(detail);
+
+      container.appendChild(card);
+    });
+  }
+
+  function renderAssetOrgSelects(){
+    var pairs = [
+      { id: 'acAssetLocation', values: APP_CONFIG.locations || [] },
+      { id: 'acAssetRegion', values: APP_CONFIG.regions || [] },
+      { id: 'acAssetDepartment', values: APP_CONFIG.departments || [] },
+      { id: 'acAssetCostCenter', values: APP_CONFIG.costCenters || [] }
+    ];
+    pairs.forEach(function(p){
+      var sel = document.getElementById(p.id);
+      var current = sel.value;
+      sel.innerHTML = '<option value="">Select&hellip;</option>';
+      p.values.forEach(function(v){
+        var opt = document.createElement('option');
+        opt.value = v; opt.textContent = v;
+        sel.appendChild(opt);
+      });
+      if(current) sel.value = current;
+    });
+
+    var equipSel = document.getElementById('acAssetEquipType');
+    var currentEquip = equipSel.value;
+    equipSel.innerHTML = '<option value="">Select&hellip;</option>';
+    Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
+      var opt = document.createElement('option');
+      opt.value = key; opt.textContent = APP_CONFIG.equipmentTypes[key].label;
+      equipSel.appendChild(opt);
+    });
+    if(currentEquip) equipSel.value = currentEquip;
+    renderAssetModelOptions();
+  }
+
+  function renderAssetModelOptions(){
+    var equipKey = document.getElementById('acAssetEquipType').value;
+    var modelSel = document.getElementById('acAssetModel');
+    var current = modelSel.value;
+    var models = (equipKey && APP_CONFIG.equipmentTypes[equipKey] && APP_CONFIG.equipmentTypes[equipKey].models) || [];
+    modelSel.innerHTML = '<option value="">Select&hellip;</option>';
+    models.forEach(function(m){
+      var opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      modelSel.appendChild(opt);
+    });
+    if(current) modelSel.value = current;
+  }
+
+  function renderAssetsSection(rows){
+    var container = document.getElementById('acAssets');
+    container.innerHTML = '';
+    if(!rows.length){ container.innerHTML = '<div class="empty-state">No units registered yet.</div>'; return; }
+    rows.forEach(function(a){
+      var row = document.createElement('div');
+      row.className = 'user-row';
+      var info = document.createElement('div');
+      info.innerHTML = '<strong>' + escapeHtml(a.unit_id) + '</strong> <span style="font-size:12.5px; color:#4B5A54;">' +
+        [APP_CONFIG.equipmentTypes[a.equipment_type] ? APP_CONFIG.equipmentTypes[a.equipment_type].label : a.equipment_type, a.model, a.location, a.region, a.department, a.cost_center].filter(Boolean).map(escapeHtml).join(' \u00b7 ') +
+        '</span>';
+      row.appendChild(info);
+
+      var btns = document.createElement('div');
+      btns.style.display = 'flex';
+      btns.style.gap = '8px';
+
+      var editBtn = document.createElement('button');
+      editBtn.className = 'secondary';
+      editBtn.type = 'button';
+      editBtn.textContent = 'Edit';
+      editBtn.addEventListener('click', function(){
+        document.getElementById('acAssetUnitId').value = a.unit_id;
+        document.getElementById('acAssetEquipType').value = a.equipment_type || '';
+        renderAssetModelOptions();
+        document.getElementById('acAssetModel').value = a.model || '';
+        document.getElementById('acAssetLocation').value = a.location || '';
+        document.getElementById('acAssetRegion').value = a.region || '';
+        document.getElementById('acAssetDepartment').value = a.department || '';
+        document.getElementById('acAssetCostCenter').value = a.cost_center || '';
+        window.scrollTo(0, document.getElementById('acAssetUnitId').getBoundingClientRect().top + window.scrollY - 100);
+      });
+      btns.appendChild(editBtn);
+
+      var delBtn = document.createElement('button');
+      delBtn.className = 'danger';
+      delBtn.type = 'button';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', function(){
+        if(!window.confirm('Delete unit "' + a.unit_id + '" from the registry? Past inspections are unaffected.')) return;
+        api('/api/assets?unitId=' + encodeURIComponent(a.unit_id), { method: 'DELETE' })
+          .then(function(){ showBannerIn('acBanner', 'Deleted.', 'ok'); loadAssetsForAdminCenter(); populateAssetDatalist(); })
+          .catch(function(e){ if(handleAuthLoss(e)) return; showBannerIn('acBanner', e.message || 'Could not delete.', 'err'); });
+      });
+      btns.appendChild(delBtn);
+
+      row.appendChild(btns);
+      container.appendChild(row);
+    });
+  }
+
+  function loadAssetsForAdminCenter(){
+    return api('/api/assets').then(function(rows){
+      renderAssetsSection(rows);
+      return rows;
+    }).catch(function(e){
+      if(handleAuthLoss(e)) return;
+      document.getElementById('acAssets').innerHTML = '<div class="empty-state">Could not load units.</div>';
+    });
+  }
+
+  function wireAdminCenter(){
+    document.getElementById('acAssetEquipType').addEventListener('change', renderAssetModelOptions);
+    document.getElementById('acSaveAssetBtn').addEventListener('click', function(){
+      clearBannerIn('acBanner');
+      var unitId = document.getElementById('acAssetUnitId').value.trim();
+      if(!unitId){ showBannerIn('acBanner', 'Unit / Asset Number is required.', 'err'); return; }
+      var payload = {
+        unitId: unitId,
+        equipmentType: document.getElementById('acAssetEquipType').value,
+        model: document.getElementById('acAssetModel').value,
+        location: document.getElementById('acAssetLocation').value,
+        region: document.getElementById('acAssetRegion').value,
+        department: document.getElementById('acAssetDepartment').value,
+        costCenter: document.getElementById('acAssetCostCenter').value
+      };
+      api('/api/assets', { method: 'POST', body: JSON.stringify(payload) })
+        .then(function(){
+          showBannerIn('acBanner', 'Unit saved.', 'ok');
+          document.getElementById('acAssetUnitId').value = '';
+          document.getElementById('acAssetEquipType').value = '';
+          document.getElementById('acAssetModel').value = '';
+          document.getElementById('acAssetLocation').value = '';
+          document.getElementById('acAssetRegion').value = '';
+          document.getElementById('acAssetDepartment').value = '';
+          document.getElementById('acAssetCostCenter').value = '';
+          loadAssetsForAdminCenter();
+          populateAssetDatalist();
+        })
+        .catch(function(e){
+          if(handleAuthLoss(e)) return;
+          showBannerIn('acBanner', e.message || 'Could not save that unit.', 'err');
+        });
+    });
+  }
+
+  function renderAdminCenter(){
+    clearBannerIn('acBanner');
+    api('/api/config').then(function(config){
+      APP_CONFIG = config;
+      renderSimpleListSection('acDepartments', 'departments', 'acAddDepartmentBtn', 'acNewDepartment', 'department');
+      renderSimpleListSection('acRegions', 'regions', 'acAddRegionBtn', 'acNewRegion', 'region');
+      renderSimpleListSection('acLocations', 'locations', 'acAddLocationBtn', 'acNewLocation', 'location');
+      renderEquipmentTypesSection();
+      renderAssetOrgSelects();
+
+      document.getElementById('acAddEquipTypeBtn').onclick = function(){
+        clearBannerIn('acBanner');
+        var key = document.getElementById('acNewEquipKey').value.trim();
+        var label = document.getElementById('acNewEquipLabel').value.trim();
+        if(!key || !label){ showBannerIn('acBanner', 'Both a key and a label are required.', 'err'); return; }
+        if(!/^[a-zA-Z0-9_]+$/.test(key)){ showBannerIn('acBanner', 'Key can only contain letters, numbers, and underscores \u2014 no spaces.', 'err'); return; }
+        if(APP_CONFIG.equipmentTypes[key]){ showBannerIn('acBanner', 'That key already exists.', 'err'); return; }
+        saveConfigMutation(function(cfg){
+          cfg.equipmentTypes[key] = { label: label, items: [], models: [] };
+        }).then(function(){
+          document.getElementById('acNewEquipKey').value = '';
+          document.getElementById('acNewEquipLabel').value = '';
+          showBannerIn('acBanner', 'Equipment type added.', 'ok');
+          renderAdminCenter();
+        }).catch(function(e){
+          if(handleAuthLoss(e)) return;
+          showBannerIn('acBanner', e.message || 'Could not add that equipment type.', 'err');
+        });
+      };
+
+      loadAssetsForAdminCenter();
+    }).catch(function(e){
+      if(handleAuthLoss(e)) return;
+      showBannerIn('acBanner', 'Could not load configuration.', 'err');
+    });
+  }
+
+  /* ---------------------------------------------------------
      Users admin
   --------------------------------------------------------- */
   function wireUsersAdmin(){
@@ -2547,35 +3069,7 @@
         })
         .then(function(config){
           APP_CONFIG = config;
-          initFormFromConfig.__reentrant = true;
-          // Re-render the parts of the New Inspection form driven by config,
-          // without re-binding all the one-time event listeners.
-          equipSelect.innerHTML = '<option value="">Select equipment&hellip;</option>';
-          histEquipFilter.innerHTML = '<option value="">All equipment</option>';
-          repEquipFilter.innerHTML = '<option value="">All equipment</option>';
-          woEquipFilter.innerHTML = '<option value="">All equipment</option>';
-          Object.keys(APP_CONFIG.equipmentTypes).forEach(function(key){
-            var opt = document.createElement('option');
-            opt.value = key;
-            opt.textContent = APP_CONFIG.equipmentTypes[key].label;
-            equipSelect.appendChild(opt);
-            histEquipFilter.appendChild(opt.cloneNode(true));
-            repEquipFilter.appendChild(opt.cloneNode(true));
-            woEquipFilter.appendChild(opt.cloneNode(true));
-          });
-          populateLocationSelects();
-    populateOrgFieldSelects();
-          var attachSelect = document.getElementById('fAttachment');
-          attachSelect.innerHTML = '<option value="none">None</option>';
-          Object.keys(APP_CONFIG.attachmentChecks).forEach(function(key){
-            var opt = document.createElement('option');
-            opt.value = key;
-            opt.textContent = APP_CONFIG.attachmentLabels[key] || key;
-            attachSelect.appendChild(opt);
-          });
-          renderFluidItems();
-          renderChecklist('');
-          renderAttachment('none');
+          refreshAllConfigDrivenUI();
         })
         .catch(function(e){
           if(handleAuthLoss(e)) return;
@@ -2589,7 +3083,9 @@
         .then(function(config){
           APP_CONFIG = config;
           document.getElementById('configEditor').value = JSON.stringify(config, null, 2);
-          showBannerIn('configBanner', 'Reset to defaults. Click "Save configuration" again if you want to make further edits, or navigate away — the reset is already applied.', 'ok');
+          refreshAllConfigDrivenUI();
+          if(document.getElementById('viewAdminCenter') && !document.getElementById('viewAdminCenter').classList.contains('hidden')) renderAdminCenter();
+          showBannerIn('configBanner', 'Reset to defaults.', 'ok');
         })
         .catch(function(e){
           if(handleAuthLoss(e)) return;
