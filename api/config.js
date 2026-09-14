@@ -4,6 +4,7 @@ import { requireAuth, requireAdmin } from '../lib/auth.js';
 const CONFIG_KEY = 'checklist_config';
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   try {
     await ensureTable();
 

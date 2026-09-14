@@ -5,6 +5,7 @@ import { sendFailureAlert } from '../lib/email.js';
 const REQUIRED_FIELDS = ['equipmentType', 'unitId', 'operator', 'date'];
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   try {
     await ensureTable();
 

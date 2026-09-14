@@ -4,6 +4,7 @@ import { requireAuth, requireAdmin } from '../lib/auth.js';
 const VALID_STATUSES = ['Open', 'In Progress', 'Closed'];
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   try {
     await ensureTable();
 

@@ -4,6 +4,7 @@ import { requireAdmin } from '../lib/auth.js';
 const REQUIRED_FIELDS = ['equipmentType', 'unitId', 'operator', 'date'];
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
   try {
     await ensureTable();
     const admin = requireAdmin(req, res);

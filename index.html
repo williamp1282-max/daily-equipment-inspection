@@ -982,6 +982,7 @@
   function api(url, options){
     options = options || {};
     options.headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+    options.cache = 'no-store';
     return fetch(url, options).then(function(res){
       return res.json().catch(function(){ return {}; }).then(function(body){
         if(!res.ok){
